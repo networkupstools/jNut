@@ -2,9 +2,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.networkupstools</groupId>
+
+    <parent>
+        <groupId>org.networkupstools</groupId>
+        <artifactId>jNut-parent</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </parent>
+
     <artifactId>jNutWebAPI</artifactId>
-    <version>0.2-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>jNutWebAPI</name>
