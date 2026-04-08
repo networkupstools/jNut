@@ -44,24 +44,24 @@ import java.util.ArrayList;
  * <p>
  * Note: Retrieved values are not valid along the time, they are valid at the
  * precise moment they are retrieved.
- * 
+ *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 public class Client {
-    
+
     /**
      * Host to which connect.
      * Network name or IP.
      * Default to "127.0.0.1"
      */
     private String host = "127.0.0.1";
-    
+
     /**
      * IP port.
      * Default to 3493
      */
     private int    port = 3493;
-    
+
     /**
      * Login to use to connect to UPSD.
      */
@@ -77,7 +77,7 @@ public class Client {
      */
     private StringLineSocket socket = null;
 
-    
+
     /**
      * Get the host name or address to which client is (or will be) connected.
      * @return Host name or address.
@@ -129,21 +129,21 @@ public class Client {
     /**
      * Get the port to which client is (or will be) connected.
      * @return Port number.
-     */   
+     */
     public int getPort() {
         return port;
     }
-    
+
     /**
      * Set the port to which client is (or will be) connected.
      * @param port Port number.
-     */   
+     */
     public void setPort(int port) {
         this.port = port;
     }
-    
-    
-    
+
+
+
     /**
      * Default constructor.
      */
@@ -164,7 +164,7 @@ public class Client {
     {
         connect(host, port, login, passwd);
     }
-    
+
     /**
      * Intent to connect and authenticate to an UPSD with specified parameters.
      * Throw an exception if cannot connect.
@@ -181,7 +181,7 @@ public class Client {
         this.passwd = passwd;
         connect();
     }
-    
+
     /**
      * Intent to connect to an UPSD with specified parameters without authentication.
      * Throw an exception if cannot connect.
@@ -204,19 +204,19 @@ public class Client {
         // Force disconnect if another connection is alive.
         if(socket!=null)
             disconnect();
-        
+
         socket = new StringLineSocket(host, port);
-        
+
         authenticate();
     }
 
     /**
-     * Intend to authenticate with specified login and password, overriding 
+     * Intend to authenticate with specified login and password, overriding
      * already defined ones.
      * @param login
      * @param passwd
      * @throws IOException
-     * @throws NutException 
+     * @throws NutException
      */
     public void authenticate(String login, String passwd) throws IOException, NutException
     {
@@ -224,11 +224,11 @@ public class Client {
         this.passwd = passwd;
         authenticate();
     }
-    
+
     /**
      * Intend to authenticate with alread set login and password.
      * @throws IOException
-     * @throws NutException 
+     * @throws NutException
      */
     public void authenticate() throws IOException, NutException
     {
@@ -253,7 +253,7 @@ public class Client {
             }
         }
     }
-    
+
     /**
      * Test if the client is connected to the UPSD.
      * Note: it does not detect if the connection have been closed by server.
@@ -263,7 +263,7 @@ public class Client {
     {
         return socket!=null && socket.isConnected();
     }
-    
+
     /**
      * Disconnect.
      */
@@ -283,7 +283,7 @@ public class Client {
             socket = null;
         }
     }
-    
+
     /**
      * Log out.
      */
@@ -305,8 +305,8 @@ public class Client {
             }
             socket = null;
         }
-    }    
-    
+    }
+
     /**
      * Merge an array of stings into on string, with a space ' ' separator.
      * @param str First string to merge
@@ -326,7 +326,7 @@ public class Client {
         }
         return res;
     }
-    
+
     /**
      * Intend to split a name/value string of the form '<name> "<value>"'.
      * @param source String source to split.
@@ -346,7 +346,7 @@ public class Client {
         res[1] = value;
         return res;
     }
-    
+
     /**
      * Intend to extract a value from its doublequoted and escaped representation.
      * @param source Source string to convert.
@@ -361,7 +361,7 @@ public class Client {
         // Unescape it.
         return unescape(source);
     }
-    
+
     /**
      * Escape string with backslashes.
      * @param str String to escape.
@@ -410,22 +410,22 @@ public class Client {
                 default:
                     throw new NutException();
             }
-        }        
+        }
     }
-    
+
     /**
      * Send a query line then read the response.
      * Helper around query(String).
      * @param query Query to send.
      * @param subquery Sub query to send.
      * @return The reply.
-     * @throws IOException 
+     * @throws IOException
      */
     protected String query(String query, String subquery) throws IOException, NutException
     {
         return query(query + " " + subquery);
     }
-    
+
     /**
      * Send a query line then read the response.
      * Helper around query(String, String ...).
@@ -433,19 +433,19 @@ public class Client {
      * @param subquery Sub query to send.
      * @param params Optionnal additionnal parameters.
      * @return The reply.
-     * @throws IOException 
+     * @throws IOException
      */
     protected String query(String query, String subquery, String[] params) throws IOException, NutException
     {
         return query(query + " " + subquery, params);
     }
-    
+
     /**
      * Send a query line then read the response.
      * @param query Query to send.
      * @param params Optionnal additionnal parameters.
      * @return The reply.
-     * @throws IOException 
+     * @throws IOException
      */
     protected String query(String query, String [] params) throws IOException, NutException
     {
@@ -457,44 +457,44 @@ public class Client {
      * Send a query line then read the response.
      * @param query Query to send.
      * @return The reply.
-     * @throws IOException 
+     * @throws IOException
      */
     protected String query(String query) throws IOException, NutException
     {
         if(!isConnected())
             return null;
-        
+
         socket.write(query);
         String res = socket.read();
         detectError(res);
         return res;
-    }   
-    
+    }
+
     /**
      * Send a GET query line then read the reply and validate the response.
      * @param subcmd GET subcommand to send.
      * @param param Extra parameters
      * @return GET result return by UPSD, without the subcommand and param prefix.
-     * @throws IOException 
+     * @throws IOException
      */
     protected String get(String subcmd, String param) throws IOException, NutException
     {
         String[] params = {param};
         return get(subcmd, params);
     }
-    
+
     /**
      * Send a GET query line then read the reply and validate the response.
      * @param subcmd GET subcommand to send.
      * @param params Eventual extra parameters.
      * @return GET result return by UPSD, without the subcommand and param prefix.
-     * @throws IOException 
+     * @throws IOException
      */
     protected String get(String subcmd, String [] params) throws IOException, NutException
     {
         if(!isConnected())
             return null;
-        
+
         subcmd = merge(subcmd, params);
         socket.write("GET " + subcmd);
         String res = socket.read();
@@ -515,38 +515,38 @@ public class Client {
      * Send a LIST query line then read replies and validate them.
      * @param subcmd LIST subcommand to send.
      * @return LIST results return by UPSD, without the subcommand and param prefix.
-     * @throws IOException 
+     * @throws IOException
      */
     protected String[] list(String subcmd) throws IOException, NutException
     {
         return list(subcmd, (String[])null);
     }
-    
+
     /**
      * Send a LIST query line then read replies and validate them.
      * @param subcmd LIST subcommand to send.
      * @param param Extra parameters.
      * @return LIST results return by UPSD, without the subcommand and param prefix.
-     * @throws IOException 
+     * @throws IOException
      */
     protected String[] list(String subcmd, String param) throws IOException, NutException
     {
         String[] params = {param};
-        return list(subcmd, params);        
+        return list(subcmd, params);
     }
-    
+
     /**
      * Send a LIST query line then read replies and validate them.
      * @param subcmd LIST subcommand to send.
      * @param params Eventual extra parameters.
      * @return LIST results return by UPSD, without the subcommand and param prefix.
-     * @throws IOException 
+     * @throws IOException
      */
     protected String[] list(String subcmd, String [] params) throws IOException, NutException
     {
         if(!isConnected())
             return null;
-        
+
         subcmd = merge(subcmd, params);
         socket.write("LIST " + subcmd);
         String res = socket.read();
@@ -555,7 +555,7 @@ public class Client {
         detectError(res);
         if(!res.startsWith("BEGIN LIST " + subcmd))
             return null;
-        
+
         ArrayList/*<String>*/ list = new ArrayList/*<String>*/();
         int sz = subcmd.length()+1;
         while(true)
@@ -568,16 +568,16 @@ public class Client {
         }
         if(!res.equals("END LIST " + subcmd))
             return null;
-        
+
         return (String[])list.toArray(new String[list.size()]);
     }
-    
-    
+
+
     /**
      * Returns the list of available devices from the NUT server.
      * @return List of devices, empty if nothing,
      * null if not connected or failed.
-     * 
+     *
      */
     public Device[] getDeviceList() throws IOException, NutException
     {
@@ -600,9 +600,9 @@ public class Client {
     /**
      * Intend to retrieve a device by its name.
      * @param name Name of the device to look at.
-     * @return Device 
+     * @return Device
      * @throws IOException
-     * @throws NutException 
+     * @throws NutException
      */
     public Device getDevice(String name)throws IOException, NutException
     {

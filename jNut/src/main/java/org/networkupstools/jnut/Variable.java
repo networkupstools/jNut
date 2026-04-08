@@ -25,7 +25,7 @@ import java.io.IOException;
  * <p>
  * It can be used to get and set its value (if possible).
  * A Variable object can be retrieved from Device instance and can not be constructed directly.
- * 
+ *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 public class Variable {
@@ -38,7 +38,7 @@ public class Variable {
      * Variable name
      */
     String name = null;
-  
+
     /**
      * Internally create a variable.
      * @param name Variable name.
@@ -49,7 +49,7 @@ public class Variable {
         this.device = device;
         this.name   = name;
     }
-    
+
     /**
      * Return the device to which the variable is related.
      * @return Attached device.
@@ -57,7 +57,7 @@ public class Variable {
     public Device getDevice() {
         return device;
     }
-    
+
     /**
      * Return the variable name.
      * @return Command name.
@@ -69,7 +69,7 @@ public class Variable {
     /**
      * Retrieve the variable value from UPSD and store it in cache.
      * @return Variable value
-     * @throws IOException 
+     * @throws IOException
      */
     public String getValue() throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
@@ -84,7 +84,7 @@ public class Variable {
     /**
      * Retrieve the variable description from UPSD and store it in cache.
      * @return Variable description
-     * @throws IOException 
+     * @throws IOException
      */
     public String getDescription() throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
@@ -95,12 +95,12 @@ public class Variable {
         }
         return null;
     }
-    
+
     /**
      * Set the variable value.
      * Note the new value can be applied with a little delay depending of UPSD and connection.
      * @param value New value for the variable
-     * @throws IOException 
+     * @throws IOException
      */
     public void setValue(String value) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
@@ -115,6 +115,6 @@ public class Variable {
             }
         }
     }
-    
+
     // TODO Add query for type, enum and range values
 }

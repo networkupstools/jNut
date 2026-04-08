@@ -30,21 +30,21 @@ package org.networkupstools.jnut;
  * A Nut exception has a (standard java exception message) message which correspond
  * to error code returns by UPSD (like 'ACCESS-DENIED', 'UNKNOWN-UPS' ...).
  * An extra string embed a more descriptive english message.
- * 
+ *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 public class NutException extends java.lang.Exception{
 
     public static String UnknownResponse = "UNKNOWN-RESPONSE";
-    
+
     public static String DriverNotConnected = "DRIVER-NOT-CONNECTED";
-    
+
     public String extra = "";
 
     public NutException()
     {
     }
-    
+
     public NutException(String message)
     {
         super(message);
@@ -60,7 +60,7 @@ public class NutException extends java.lang.Exception{
     {
         super(cause);
     }
-    
+
     public NutException(String message, Throwable cause)
     {
         super(message, cause);
@@ -87,7 +87,7 @@ public class NutException extends java.lang.Exception{
     public void setExtra(String extra) {
         this.extra = extra;
     }
-    
+
     /**
      * Test is the exception corresponds to the specified name.
      * @param name Name to test
