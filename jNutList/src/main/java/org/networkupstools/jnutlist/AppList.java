@@ -43,9 +43,11 @@ public class AppList
 
         String setName  = "";
         String setValue = "";
+        Boolean setApplied = null;
 
         String cmdName  = "";
         String cmdValue = "";
+        Boolean cmdApplied = null;
 
         String optName  = "";
         String optValue = "";
@@ -194,16 +196,6 @@ public class AppList
                     }
                     System.out.println("DEV " + dev.getName() + desc);
 
-                    if (!setName.isEmpty()) {
-                        Variable setVar = new Variable(setName, dev);
-                        setVar.setValue(setValue);
-                    }
-
-                    if (!cmdName.isEmpty()) {
-                        Command cmd = new Command(cmdName, dev);
-                        cmd.execute(cmdValue);
-                    }
-
                     try {
                         Variable[] vars = dev.getVariableList();
                         if(vars!=null)
@@ -220,6 +212,27 @@ public class AppList
                                     e.printStackTrace();
                                 }
                                 System.out.println("  VAR " + var.getName() + res );
+
+                                try {
+                                    if (!setName.isEmpty() && setName.equals(var.getValue())) {
+                                        var.setValue(setValue);
+                                        setApplied = true;
+                                    }
+                                } catch(NutException e) {
+                                    e.printStackTrace();
+                                    if (setApplied == null)
+                                        setApplied = false;
+                                }
+
+                                try {
+                                    if (!setName.isEmpty() && setName.equals(var.getValue())) {
+                                        var = dev.getVariable(setName);
+                                        res = " = " + var.getValue() + " (" + var.getDescription() + ")";
+                                        System.out.println("  UPDATED: VAR " + var.getName() + res );
+                                    }
+                                } catch(NutException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                         else
@@ -244,6 +257,17 @@ public class AppList
                                     e.printStackTrace();
                                 }
                                 System.out.println("  CMD " + cmd.getName() + res);
+
+                                try {
+                                    if (!cmdName.isEmpty() && cmdName.equals(cmd.getName())) {
+                                        cmd.execute(cmdValue);
+                                        cmdApplied = true;
+                                    }
+                                } catch(NutException e) {
+                                    if (cmdApplied == null)
+                                        cmdApplied = false;
+                                    e.printStackTrace();
+                                }
                             }
                         }
                         else
@@ -260,5 +284,10 @@ public class AppList
             e.printStackTrace();
         }
 
+        if (cmdApplied != null)
+            System.out.println("  Called CMD '" + cmdName + "', succeeded at least once: " + cmdApplied.toString());
+
+        if (setApplied != null)
+            System.out.println("  Assigned VAR '" + setName + "', succeeded at least once: " + setApplied.toString());
     }
 }
