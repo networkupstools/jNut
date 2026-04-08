@@ -69,4 +69,29 @@ jobs:
     - name: Maven build and test
       run: mvn package
 
-    # TODO: Setup NUT, run client (add in-tree script for that and call it)
+    # Setup NUT, run client (add in-tree script for that and call it)
+    # NOTE: We use binaries from the package for speedier turnaround
+    # TOTHINK: No SSL self-reporting before NUT v2.8.5 ...
+    - name: Checkout NUT sources (for NIT script)
+      run: |
+        git clone --depth=1 https://github.com/networkupstools/nut
+
+    - if: matrix.os == 'ubuntu-latest'
+      name: Test jNut with NIT
+      run: |
+        PATH="/lib/nut:/libexec/nut:/usr/sbin:/usr/bin:$PATH"
+        export PATH
+        #NIT_CASE="generatecfg_upsd_add_SSL && generatecfg_upsdusers_trivial && generatecfg_ups_dummy"
+        WITH_SSL_SERVER=NSS WITH_SSL_CLIENT=NSS \
+        NIT_CASE="generatecfg_sandbox" DEBUG_SLEEP=1 ./nut/tests/NIT/nit.sh || exit
+        if [ -s ./nut/tests/NIT/tmp/etc/NIT.env ]; then
+            . ./nut/tests/NIT/tmp/etc/NIT.env || exit
+        else . ./tmp/etc/NIT.env || exit ; fi
+        echo 'maxstartdelay = 30' > "$NUT_CONFPATH/ups.conf.x"
+        grep -v maxstartdelay < "$NUT_CONFPATH/ups.conf" >> "$NUT_CONFPATH/ups.conf.x"
+        mv -f "$NUT_CONFPATH/ups.conf.x" "$NUT_CONFPATH/ups.conf"
+        upsdrvctl start
+        upsd -DDDDDD &
+        UPSD_PID="$!"
+        trap 'kill $UPSD_PID ; upsdrvctl stop' 0 1 2 3 15
+        java -jar ./jNutList/target/jNutList-*-jar-with-dependencies.jar localhost "${NUT_PORT}" "admin" "${TESTPASS_ADMIN}" || exit
