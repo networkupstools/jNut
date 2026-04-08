@@ -19,6 +19,7 @@
 package org.networkupstools.jnut;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Class representing a command of a device.
@@ -82,13 +83,26 @@ public class Command {
     }
 
     /**
-     * Execute the instant command.
+     * Execute the instant command without any optional argument.
      * @throws IOException
      */
     public void execute() throws IOException, NutException {
+        execute(null);
+    }
+
+    /**
+     * Execute the instant command with an optional argument (may be null or empty).
+     * @throws IOException
+     */
+    public void execute(String arg) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
         {
             String[] params = {device.getName(), name};
+            if (arg != null && !arg.isEmpty()) {
+                String[] newArray = Arrays.copyOf(params, params.length + 1);
+                newArray[newArray.length - 1] = arg;
+                params = newArray;
+            }
             String res = device.getClient().query("INSTCMD", params);
             if(!res.equals("OK"))
             {
