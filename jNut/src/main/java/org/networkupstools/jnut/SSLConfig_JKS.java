@@ -32,7 +32,9 @@ public class SSLConfig_JKS extends SSLConfig {
             TrustManagerFactory tmf = null;
             if (trustStorePath != null) {
                 KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
-                ts.load(new FileInputStream(trustStorePath), trustStorePassword.toCharArray());
+                try (FileInputStream tsStream = new FileInputStream(trustStorePath)) {
+                    ts.load(tsStream, trustStorePassword.toCharArray());
+                }
                 tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(ts);
             }
@@ -40,7 +42,9 @@ public class SSLConfig_JKS extends SSLConfig {
             KeyManagerFactory kmf = null;
             if (keyStorePath != null) {
                 KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                ks.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+                try (FileInputStream ksStream = new FileInputStream(keyStorePath)) {
+                    ks.load(ksStream, keyStorePassword.toCharArray());
+                }
                 kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
                 kmf.init(ks, keyStorePassword.toCharArray());
             }
