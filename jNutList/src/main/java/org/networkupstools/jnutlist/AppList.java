@@ -221,7 +221,10 @@ public class AppList
 
                                 try {
                                     if (!setName.isEmpty() && setName.equals(var.getValue())) {
-                                        var.setValue(setValue);
+                                        if (tracking)
+                                            var.setValue(setValue, 1, 10);
+                                        else
+                                            var.setValue(setValue);
                                         setApplied = true;
                                     }
                                 } catch(NutException e) {
@@ -266,7 +269,10 @@ public class AppList
 
                                 try {
                                     if (!cmdName.isEmpty() && cmdName.equals(cmd.getName())) {
-                                        cmd.execute(cmdValue);
+                                        if (tracking)
+                                            cmd.execute(cmdValue, 1, 10);
+                                        else
+                                            cmd.execute(cmdValue);
                                         cmdApplied = true;
                                     }
                                 } catch(NutException e) {
