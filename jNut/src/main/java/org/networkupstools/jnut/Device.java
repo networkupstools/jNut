@@ -190,7 +190,15 @@ public class Device {
             String res = client.get("NUMLOGINS", name);
             // NUMLOGINS <ups> <value>
             String[] parts = res.split(" ");
-            return parts.length >= 1 ? Integer.parseInt(parts[0]) : -1;
+            if (parts.length >= 1) {
+                try {
+                    return Integer.parseInt(parts[0]);
+                } catch (NumberFormatException e) {
+                    return -1;
+                }
+            } else {
+                return -1;
+            }
         }
         return -1;
     }
