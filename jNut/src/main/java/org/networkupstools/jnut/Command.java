@@ -88,7 +88,7 @@ public class Command {
      * @throws IOException
      */
     public TrackingID execute() throws IOException, NutException {
-        return execute(null);
+        return execute(null, -1, -1);
     }
 
     /**
@@ -98,21 +98,47 @@ public class Command {
      * @throws IOException
      */
     public TrackingID execute(String param) throws IOException, NutException {
+        return execute(param, -1, -1);
+    }
+
+    /**
+     * Execute the instant command with an optional parameter,
+     * and optionally waiting for completion.
+     * @param param Command parameter (may be null to not send it; however an empty string may be a valid value for server side).
+     * @param waitIntervalSec Interval between checks in seconds (if >= 1).
+     * @param waitMaxCount Maximum number of checks (if >= 1).
+     * @return Tracking ID if tracking is enabled (and not waiting), or null.
+     * @throws IOException
+     * @throws NutException
+     */
+    public TrackingID execute(String param, int waitIntervalSec, int waitMaxCount) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
         {
+            Client client = device.getClient();
+            boolean doWait = waitIntervalSec >= 1 && waitMaxCount >= 1;
+            if (doWait) {
+                client.enableTrackingModeOnce();
+            }
+
             String[] params;
             if (param != null) {
                 params = new String[]{device.getName(), name, param};
             } else {
                 params = new String[]{device.getName(), name};
             }
-            String res = device.getClient().query("INSTCMD", params);
+            String res = client.query("INSTCMD", params);
             if(!res.startsWith("OK"))
             {
                 // Normaly response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Command.execute : " + res);
             }
-            return device.getClient().getLastTrackingId();
+            TrackingID tid = client.getLastTrackingId();
+            if (doWait && tid != null && tid.isValid()) {
+                if (client.waitTrackingResult(tid, waitIntervalSec, waitMaxCount)) {
+                    return null;
+                }
+            }
+            return tid;
         }
         return null;
     }

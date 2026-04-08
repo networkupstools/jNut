@@ -105,17 +105,42 @@ public class Variable {
      * @throws IOException
      */
     public TrackingID setValue(String value) throws IOException, NutException {
+        return setValue(value, -1, -1);
+    }
+
+    /**
+     * Set the variable value, optionally waiting for completion.
+     * @param value New value for the variable.
+     * @param waitIntervalSec Interval between checks in seconds (if >= 1).
+     * @param waitMaxCount Maximum number of checks (if >= 1).
+     * @return Tracking ID if tracking is enabled (and not waiting), or null.
+     * @throws IOException
+     * @throws NutException
+     */
+    public TrackingID setValue(String value, int waitIntervalSec, int waitMaxCount) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
         {
+            Client client = device.getClient();
+            boolean doWait = waitIntervalSec >= 1 && waitMaxCount >= 1;
+            if (doWait) {
+                client.enableTrackingModeOnce();
+            }
+
             String[] params = {"VAR", device.getName(),
                     name, " \"" + Client.escape(value) + "\""};
-            String res = device.getClient().query("SET", params);
+            String res = client.query("SET", params);
             if(!res.startsWith("OK"))
             {
                 // Normaly response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Variable.setValue : " + res);
             }
-            return device.getClient().getLastTrackingId();
+            TrackingID tid = client.getLastTrackingId();
+            if (doWait && tid != null && tid.isValid()) {
+                if (client.waitTrackingResult(tid, waitIntervalSec, waitMaxCount)) {
+                    return null;
+                }
+            }
+            return tid;
         }
         return null;
     }

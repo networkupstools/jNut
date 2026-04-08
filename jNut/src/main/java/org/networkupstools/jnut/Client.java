@@ -642,6 +642,20 @@ public class Client {
         return (String[])list.toArray(new String[list.size()]);
     }
 
+    /**
+     * Enable TRACKING mode on this connection if it is not already enabled.
+     * @return True if tracking is enabled.
+     * @throws IOException
+     * @throws NutException
+     */
+    public boolean enableTrackingModeOnce() throws IOException, NutException {
+        if (tracking) {
+            return true;
+        }
+        setTracking(true);
+        return tracking;
+    }
+
     public String getTrackingResult(TrackingID id) throws IOException, NutException {
         if (id == null || !id.isValid()) return null;
         String res = get("TRACKING", id.getId());
@@ -652,6 +666,43 @@ public class Client {
             return res;
 
         throw new NutException(NutException.UnknownResponse, "Unknown response in getTrackingResult : " + res);
+    }
+
+    /**
+     * Wait for a tracking ID to complete.
+     * @param id Tracking ID to wait for.
+     * @param waitIntervalSec Interval between checks in seconds.
+     * @param waitMaxCount Maximum number of checks.
+     * @return True if command succeeded, false if timed out or failed.
+     * @throws IOException
+     * @throws NutException
+     */
+    public boolean waitTrackingResult(TrackingID id, int waitIntervalSec, int waitMaxCount) throws IOException, NutException {
+        if (id == null || !id.isValid() || waitIntervalSec < 1 || waitMaxCount < 1) {
+            return false;
+        }
+
+        while (waitMaxCount > 0) {
+            String status = getTrackingResult(id);
+            if ("SUCCESS".equals(status)) {
+                return true;
+            } else if ("PENDING".equals(status)) {
+                // Still waiting...
+            } else if (status != null && status.startsWith("ERR")) {
+                // Command failed
+                return false;
+            }
+
+            try {
+                Thread.sleep(waitIntervalSec * 1000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+            waitMaxCount--;
+        }
+
+        return false;
     }
 
     /**
