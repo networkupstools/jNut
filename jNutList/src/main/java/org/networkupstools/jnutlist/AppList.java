@@ -40,7 +40,7 @@ public class AppList
         int    forceSSL   = 0;
         int    certVerify = 0;
 
-        Boolean tracking   = false;
+        boolean tracking   = false;
 
         String setName  = "";
         String setValue = "";
