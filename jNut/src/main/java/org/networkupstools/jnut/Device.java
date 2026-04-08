@@ -26,11 +26,11 @@ import java.util.ArrayList;
  * <p>
  * It can retrieve its description, its number of logins, its variable and command lists.
  * A Device object can be retrieved from Client instance and can not be constructed directly.
- * 
+ *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 public class Device {
-    
+
     /**
      * Client to which device is attached
      */
@@ -40,7 +40,7 @@ public class Device {
      * Device name
      */
     String name = null;
- 
+
     /**
      * Internally create a device.
      * @param name Device name.
@@ -59,7 +59,7 @@ public class Device {
     public Client getClient() {
         return client;
     }
-    
+
     /**
      * Return the device name.
      * @return Device name.
@@ -71,7 +71,7 @@ public class Device {
     /**
      * Retrieve the device description from UPSD and store it in cache.
      * @return Device description
-     * @throws IOException 
+     * @throws IOException
      */
     public String getDescription() throws IOException, NutException {
         if(client!=null)
@@ -80,7 +80,7 @@ public class Device {
         }
         return null;
     }
-    
+
     /**
      * Log in to the ups.
      * <p>
@@ -91,7 +91,7 @@ public class Device {
      * NOTE: You probably shouldn't send this command unless you are upsmon,
      * or a upsmon replacement.
      * @throws IOException
-     * @throws NutException 
+     * @throws NutException
      */
     public void login() throws IOException, NutException {
         if(client!=null)
@@ -104,12 +104,12 @@ public class Device {
             }
         }
     }
-    
+
     /**
      * This function doesn't do much by itself.  It is used by <i>upsmon</i> to make
      * sure that master-level functions like FSD are available if necessary
      * @throws IOException
-     * @throws NutException 
+     * @throws NutException
      */
     public void master() throws IOException, NutException {
         if(client!=null)
@@ -134,12 +134,12 @@ public class Device {
      * Setting this flag makes "FSD" appear in a STATUS request for this UPS.
      * Finding "FSD" in a status request should be treated just like a "OB LB".
      * <p>
-     * It should be noted that FSD is currently a latch - once set, there is  
+     * It should be noted that FSD is currently a latch - once set, there is
      * no way to clear it short of restarting upsd or dropping then re-adding
      * it in the ups.conf.  This may cause issues when upsd is running on a
      * system that is not shut down due to the UPS event.
      * @throws IOException
-     * @throws NutException 
+     * @throws NutException
      */
     public void setForcedShutdown() throws IOException, NutException {
         if(client!=null)
@@ -152,12 +152,12 @@ public class Device {
             }
         }
     }
-    
+
     /**
      * Return the number of clients which have done LOGIN for this UPS.
      * Force to retrieve it from UPSD and store it in cache.
      * @return Number of clients, -1 if error.
-     * @throws IOException 
+     * @throws IOException
      */
     public int getNumLogin() throws IOException, NutException {
         if(client!=null)
@@ -167,22 +167,22 @@ public class Device {
         }
         return -1;
     }
-    
+
 
     /**
      * Return the list of device variables from the NUT server.
      * @return List of variables, empty if nothing,
      * null if not connected or failed.
-     * @throws IOException 
+     * @throws IOException
      */
     public Variable[] getVariableList() throws IOException, NutException {
         if(client==null)
             return null;
-        
+
         String[] res = client.list("VAR", name);
         if(res==null)
             return null;
-        
+
         ArrayList/*<Variable>*/ list = new ArrayList/*<Variable>*/();
         for(int i=0; i<res.length; i++)
         {
@@ -194,21 +194,21 @@ public class Device {
         }
         return (Variable[])list.toArray(new Variable[list.size()]);
     }
-    
+
     /**
      * Return the list of device RW variables from the NUT server.
      * @return List of variables, empty if nothing,
      * null if not connected or failed.
-     * @throws IOException 
+     * @throws IOException
      */
     public Variable[] getRWVariableList() throws IOException, NutException {
         if(client==null)
             return null;
-        
+
         String[] res = client.list("RW", name);
         if(res==null)
             return null;
-        
+
         ArrayList/*<Variable>*/ list = new ArrayList/*<Variable>*/();
         for(int i=0; i<res.length; i++)
         {
@@ -220,37 +220,37 @@ public class Device {
         }
         return (Variable[])list.toArray(new Variable[list.size()]);
     }
-    
+
     /**
      * Return a variable from its name.
      * @param name Name of the queried variable.
      * @return The corresponding variable object if exists.
      * @throws IOException
-     * @throws NutException 
+     * @throws NutException
      */
     public Variable getVariable(String name) throws IOException, NutException {
         if(client==null)
             return null;
-        
+
         String[] params = {this.name, name};
         client.get("VAR", params);
         return new Variable(name, this);
     }
-    
+
     /**
      * Return the list of device commands from the NUT server.
      * @return List of commands, empty if nothing,
      * null if not connected or failed.
-     * @throws IOException 
+     * @throws IOException
      */
     public Command[] getCommandList() throws IOException, NutException {
         if(client==null)
             return null;
-        
+
         String[] res = client.list("CMD", name);
         if(res==null)
             return null;
-        
+
         ArrayList/*<Command>*/ list = new ArrayList/*<Command>*/();
         for(int i=0; i<res.length; i++)
         {
@@ -264,12 +264,12 @@ public class Device {
      * @param name Name of the queried command.
      * @return The corresponding command object if exists.
      * @throws IOException
-     * @throws NutException 
+     * @throws NutException
      */
     public Command getCommand(String name)throws IOException, NutException {
         if(client==null)
             return null;
-        
+
         String[] params = {this.name, name};
         String res = client.get("CMDDESC", params);
         // Note: there is no way to test if the command is really available or not

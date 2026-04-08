@@ -23,18 +23,18 @@ import java.net.UnknownHostException;
 import org.networkupstools.jnut.*;
 
 
-public class AppList 
+public class AppList
 {
-    
+
     public static void main( String[] args )
     {
         String host  = args.length>=1?args[0]:"localhost";
         int    port  = args.length>=2?Integer.valueOf(args[1]).intValue():3493;
         String login = args.length>=3?args[2]:"";
         String pass  = args.length>=4?args[3]:"";
-        
+
         System.out.println( "jNutList connecting to " + login+":"+pass+"@"+host+":"+port );
-        
+
         Client client = new Client();
         try {
             client.connect(host, port, login, pass);
@@ -51,7 +51,7 @@ public class AppList
                         e.printStackTrace();
                     }
                     System.out.println("DEV " + dev.getName() + desc);
-                    
+
                     try {
                         Variable[] vars = dev.getVariableList();
                         if(vars!=null)
@@ -75,7 +75,7 @@ public class AppList
                     } catch(NutException e) {
                         e.printStackTrace();
                     }
-                    
+
                     try {
                         Command[] cmds = dev.getCommandList();
                         if(cmds!=null)
@@ -98,15 +98,15 @@ public class AppList
                             System.out.println("  NULL CMD");
                     } catch(NutException e) {
                         e.printStackTrace();
-                    }                    
+                    }
                 }
             }
-            
+
             client.disconnect();
-            
+
         }catch(Exception e){
             e.printStackTrace();
         }
-        
+
     }
 }

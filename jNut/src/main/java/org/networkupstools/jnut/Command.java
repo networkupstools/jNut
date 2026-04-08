@@ -25,7 +25,7 @@ import java.io.IOException;
  * <p>
  * It can be used to retrieve description and execute commands.
  * A Command object can be retrieved from Device instance and can not be constructed directly.
- * 
+ *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 public class Command {
@@ -49,7 +49,7 @@ public class Command {
         this.device = device;
         this.name   = name;
     }
-    
+
     /**
      * Return the device to which the command can be executed.
      * @return Attached device.
@@ -57,7 +57,7 @@ public class Command {
     public Device getDevice() {
         return device;
     }
-    
+
     /**
      * Return the command name.
      * @return Command name.
@@ -69,7 +69,7 @@ public class Command {
     /**
      * Retrieve the command description from UPSD and store it in cache.
      * @return Command description
-     * @throws IOException 
+     * @throws IOException
      */
     public String getDescription() throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
@@ -83,7 +83,7 @@ public class Command {
 
     /**
      * Execute the instant command.
-     * @throws IOException 
+     * @throws IOException
      */
     public void execute() throws IOException, NutException {
         if(device!=null && device.getClient()!=null)

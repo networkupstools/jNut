@@ -28,50 +28,50 @@ import java.net.UnknownHostException;
 /**
  * Class representing a socket, internally used to communicate with UPSD.
  * Abstract some stream mechanisms.
- * 
+ *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 class StringLineSocket {
-    
+
     /**
      * Real internal TCP socket.
      */
     Socket socket = null;
-    
+
     /**
      * Writer to the socket.
      */
     private OutputStreamWriter writer = null;
-    
+
     /**
      * Reader from the socket.
      */
-    private BufferedReader reader = null;    
-    
+    private BufferedReader reader = null;
+
     /**
      * Create a new line socket.
      */
     public StringLineSocket(){
-        
+
     }
-    
+
     /**
      * Create a new line socket and connect it.
      * @param host Host to connect to
      * @param port Port to connect to
      * @throws UnknownHostException
-     * @throws IOException 
+     * @throws IOException
      */
     public StringLineSocket(String host, int port) throws UnknownHostException, IOException{
         connect(host, port);
     }
-    
+
     /**
      * Connect a new line socket.
      * @param host Host to connect to
      * @param port Port to connect to
      * @throws UnknownHostException
-     * @throws IOException 
+     * @throws IOException
      */
     public void connect(String host, int port) throws UnknownHostException, IOException{
         socket = new Socket(host, port);
@@ -82,7 +82,7 @@ class StringLineSocket {
             writer = new OutputStreamWriter(socket.getOutputStream());
         }
     }
-    
+
     /**
      * Close the socket.
      */
@@ -96,7 +96,7 @@ class StringLineSocket {
             reader = null;
         }
     }
-    
+
     /**
      * Test if the soecket is connected.
      * @return True if connected.
@@ -104,11 +104,11 @@ class StringLineSocket {
     public boolean isConnected() {
         return socket!=null && socket.isConnected() && !socket.isClosed();
     }
-    
+
     /**
      * Write a line follow by a '\n' character.
-     * @param line 
-     * @throws IOException 
+     * @param line
+     * @throws IOException
      */
     public void write(String line) throws IOException
     {
@@ -118,11 +118,11 @@ class StringLineSocket {
             writer.flush();
         }
     }
-    
+
     /**
      * Read a line terminated by a '\n'.
      * @return The line without the ending '\n'
-     * @throws IOException 
+     * @throws IOException
      */
     public String read() throws IOException
     {

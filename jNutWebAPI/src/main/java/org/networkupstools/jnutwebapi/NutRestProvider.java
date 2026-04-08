@@ -45,7 +45,7 @@ public class NutRestProvider {
     public String get() {
         return "UPSD connections";
     }
-    
+
     @Path("{server}")
     public Server getServers(@PathParam("server") String server) {
         try {
@@ -58,7 +58,7 @@ public class NutRestProvider {
 
     public class Server {
         Client client = new Client();
-        
+
         public Server(String server) throws IOException, UnknownHostException, NutException {
             int idx = server.indexOf(':');
             if(idx!=-1)
@@ -71,7 +71,7 @@ public class NutRestProvider {
                 client.connect(server, 3493);
             }
         }
-        
+
         @GET
         @Produces("application/json")
         public String getDeviceList() {
@@ -92,8 +92,8 @@ public class NutRestProvider {
              return null;
             }
         }
-        
-        
+
+
         @Path("{dev}")
         public Dev getDev(@PathParam("dev") String dev) {
             try {
@@ -103,13 +103,13 @@ public class NutRestProvider {
                  return null;
             }
         }
-        
-        
-        
+
+
+
         public class Dev {
-            
+
             Device device;
-            
+
             public Dev(String dev) throws IOException, NutException{
                 device = client.getDevice(dev);
             }
@@ -119,7 +119,7 @@ public class NutRestProvider {
             public String getDescriptionShortcut() {
                 return getDescription();
             }
-            
+
             @GET
             @Produces("application/json")
             @Path("description")
@@ -134,8 +134,8 @@ public class NutRestProvider {
                     return null;
                 }
             }
-            
-            
+
+
             @GET
             @Produces("application/json")
             @Path("vars")
@@ -156,7 +156,7 @@ public class NutRestProvider {
                     return null;
                 }
             }
-            
+
             @Path("vars/{var}")
             public Var getVar(@PathParam("var") String var){
                 try {
@@ -164,17 +164,17 @@ public class NutRestProvider {
                 } catch(Exception ex) {
                      Logger.getLogger(NutRestProvider.class.getName()).log(Level.SEVERE, null, ex);
                      return null;
-                }                
+                }
             }
-            
+
             public class Var {
-                
+
                 Variable variable = null;
-                
+
                 public Var(String var) throws IOException, NutException{
                     variable = device.getVariable(var);
                 }
-                
+
                 @GET
                 @Produces("application/json")
                 public String getValue() {
@@ -185,7 +185,7 @@ public class NutRestProvider {
                          return null;
                     }
                 }
-                
+
                 @GET
                 @Produces("application/json")
                 @Path("description")

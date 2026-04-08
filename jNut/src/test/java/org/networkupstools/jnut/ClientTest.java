@@ -57,7 +57,7 @@ public class ClientTest extends TestCase
         assertEquals("Internal backslash and doublequote", "he\\\\\\\"llo", Client.escape("he\\\"llo"));
         assertEquals("Initial and final doublequote", "\\\"hello\\\"", Client.escape("\"hello\""));
     }
-    
+
     /**
      * Unescape function test.
      */
@@ -70,7 +70,7 @@ public class ClientTest extends TestCase
         assertEquals("Internal backslash and doublequote", "he\\\"llo", Client.unescape("he\\\\\\\"llo"));
         assertEquals("Initial and final doublequote", "\"hello\"", Client.unescape("\\\"hello\\\""));
     }
-    
+
     /**
      * extractDoublequotedValue function test.
      */
@@ -85,7 +85,7 @@ public class ClientTest extends TestCase
         assertEquals("String with backslash", "he\\llo", Client.extractDoublequotedValue("\"he\\\\llo\""));
         assertEquals("String with backslash and doublequote", "he\\\"llo", Client.extractDoublequotedValue("\"he\\\\\\\"llo\""));
     }
-    
+
     /**
      * splitNameValueString function test.
      */
@@ -105,9 +105,9 @@ public class ClientTest extends TestCase
         assertEquals("Simple name / complex value (value)", "complex value", res[1]);
         res = Client.splitNameValueString("name \"complex\\\\value\"");
         assertEquals("Simple name / backslash value (name)", "name", res[0]);
-        assertEquals("Simple name / backslash value (value)", "complex\\value", res[1]);        
+        assertEquals("Simple name / backslash value (value)", "complex\\value", res[1]);
         res = Client.splitNameValueString("name \"complex\\\"value\"");
         assertEquals("Simple name / doublequote value (name)", "name", res[0]);
-        assertEquals("Simple name / doublequote value (value)", "complex\"value", res[1]);        
+        assertEquals("Simple name / doublequote value (value)", "complex\"value", res[1]);
     }
 }
