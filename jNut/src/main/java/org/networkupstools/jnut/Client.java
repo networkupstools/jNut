@@ -596,7 +596,7 @@ public class Client {
         if (res == null) return null;
         detectError(res);
 
-        if (res == "SUCCESS" || res == "PENDING")
+        if ("SUCCESS".equals(res) || "PENDING".equals(res))
             return res;
 
         throw new NutException(NutException.UnknownResponse, "Unknown response in getTrackingResult : " + res);
