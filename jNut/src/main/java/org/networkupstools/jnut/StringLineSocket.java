@@ -25,6 +25,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -104,6 +105,10 @@ class StringLineSocket {
         if (isConnected()) {
             SSLSocketFactory factory = sslContext.getSocketFactory();
             SSLSocket sslSocket = (SSLSocket) factory.createSocket(socket, host, port, true);
+            // Enable hostname verification to prevent man-in-the-middle attacks
+            SSLParameters sslParameters = sslSocket.getSSLParameters();
+            sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+            sslSocket.setSSLParameters(sslParameters);
             sslSocket.startHandshake();
             socket = sslSocket;
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
