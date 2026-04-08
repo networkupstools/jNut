@@ -104,7 +104,7 @@ public class Variable {
      * @return Tracking ID if tracking is enabled, or null.
      * @throws IOException
      */
-    public String setValue(String value) throws IOException, NutException {
+    public TrackingID setValue(String value) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
         {
             String[] params = {"VAR", device.getName(),

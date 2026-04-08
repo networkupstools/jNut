@@ -92,7 +92,7 @@ public class Client {
     /**
      * Tracking ID for last SET or INSTCMD
      */
-    private String lastTrackingId = null;
+    private TrackingID lastTrackingId = null;
 
     /**
      * Get the host name or address to which client is (or will be) connected.
@@ -194,7 +194,7 @@ public class Client {
      * Get the tracking ID for last SET or INSTCMD.
      * @return Tracking ID.
      */
-    public String getLastTrackingId() {
+    public TrackingID getLastTrackingId() {
         return lastTrackingId;
     }
 
@@ -532,9 +532,9 @@ public class Client {
         detectError(res);
 
         if (res.startsWith("OK TRACKING ")) {
-            lastTrackingId = res.substring(12);
+            lastTrackingId = new TrackingID(res.substring(12));
         } else if (res.equals("OK")) {
-            lastTrackingId = null;
+            lastTrackingId = new TrackingID("");
         }
 
         return res;
@@ -642,8 +642,9 @@ public class Client {
         return (String[])list.toArray(new String[list.size()]);
     }
 
-    public String getTrackingResult(String id) throws IOException, NutException {
-        String res = get("TRACKING", id);
+    public String getTrackingResult(TrackingID id) throws IOException, NutException {
+        if (id == null || !id.isValid()) return null;
+        String res = get("TRACKING", id.getId());
         if (res == null) return null;
         detectError(res);
 

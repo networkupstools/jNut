@@ -87,7 +87,7 @@ public class Command {
      * @return Tracking ID if tracking is enabled, or null.
      * @throws IOException
      */
-    public String execute() throws IOException, NutException {
+    public TrackingID execute() throws IOException, NutException {
         return execute(null);
     }
 
@@ -97,7 +97,7 @@ public class Command {
      * @return Tracking ID if tracking is enabled, or null.
      * @throws IOException
      */
-    public String execute(String param) throws IOException, NutException {
+    public TrackingID execute(String param) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
         {
             String[] params;
