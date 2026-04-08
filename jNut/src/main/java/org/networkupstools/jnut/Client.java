@@ -1,6 +1,7 @@
 /* Client.java
 
    Copyright (C) 2011 Eaton
+   Copyright (C) 2026- Jim Klimov <jimklimov+nut@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -77,10 +78,21 @@ public class Client {
      */
     private StringLineSocket socket = null;
 
+
     /**
      * SSL configuration
      */
     private SSLConfig sslConfig = null;
+
+    /**
+     * Tracking activation status
+     */
+    private boolean tracking = false;
+
+    /**
+     * Tracking ID for last SET or INSTCMD
+     */
+    private String lastTrackingId = null;
 
     /**
      * Get the host name or address to which client is (or will be) connected.
@@ -152,6 +164,38 @@ public class Client {
 
     public void setSslConfig(SSLConfig sslConfig) {
         this.sslConfig = sslConfig;
+    }
+
+    /**
+     * Get the tracking activation status.
+     * @return Tracking activation status.
+     */
+    public boolean isTrackingEnabled() {
+        return tracking;
+    }
+
+    /**
+     * Set the tracking activation status.
+     * @param tracking New tracking activation status.
+     * @throws IOException
+     * @throws NutException
+     */
+    public void setTracking(boolean tracking) throws IOException, NutException {
+        String res = query("SET TRACKING", tracking ? "ON" : "OFF");
+        if (res.startsWith("OK")) {
+            this.tracking = tracking;
+        } else {
+            // Normally response should be OK or ERR and nothing else.
+            throw new NutException(NutException.UnknownResponse, "Unknown response in Client.setTracking : " + res);
+        }
+    }
+
+    /**
+     * Get the tracking ID for last SET or INSTCMD.
+     * @return Tracking ID.
+     */
+    public String getLastTrackingId() {
+        return lastTrackingId;
     }
 
     /**
@@ -486,6 +530,13 @@ public class Client {
         socket.write(query);
         String res = socket.read();
         detectError(res);
+
+        if (res.startsWith("OK TRACKING ")) {
+            lastTrackingId = res.substring(12);
+        } else if (res.equals("OK")) {
+            lastTrackingId = null;
+        }
+
         return res;
     }
 

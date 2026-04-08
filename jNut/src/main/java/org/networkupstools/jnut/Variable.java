@@ -1,6 +1,7 @@
 /* Variable.java
 
    Copyright (C) 2011 Eaton
+   Copyright (C) 2026- Jim Klimov <jimklimov+nut@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -100,20 +101,23 @@ public class Variable {
      * Set the variable value.
      * Note the new value can be applied with a little delay depending of UPSD and connection.
      * @param value New value for the variable
+     * @return Tracking ID if tracking is enabled, or null.
      * @throws IOException
      */
-    public void setValue(String value) throws IOException, NutException {
+    public String setValue(String value) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
         {
             String[] params = {"VAR", device.getName(),
                     name, " \"" + Client.escape(value) + "\""};
             String res = device.getClient().query("SET", params);
-            if(!res.equals("OK"))
+            if(!res.startsWith("OK"))
             {
                 // Normaly response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Variable.setValue : " + res);
             }
+            return device.getClient().getLastTrackingId();
         }
+        return null;
     }
 
     /**

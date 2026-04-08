@@ -1,6 +1,7 @@
 /* Command.java
 
    Copyright (C) 2011 Eaton
+   Copyright (C) 2026- Jim Klimov <jimklimov+nut@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,7 +20,6 @@
 package org.networkupstools.jnut;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Class representing a command of a device.
@@ -84,31 +84,36 @@ public class Command {
 
     /**
      * Execute the instant command without any optional argument.
+     * @return Tracking ID if tracking is enabled, or null.
      * @throws IOException
      */
-    public void execute() throws IOException, NutException {
-        execute(null);
+    public String execute() throws IOException, NutException {
+        return execute(null);
     }
 
     /**
-     * Execute the instant command with an optional argument (may be null or empty).
+     * Execute the instant command with an optional parameter.
+     * @param param Command parameter (may be null to not send it; however an empty string may be a valid value for server side).
+     * @return Tracking ID if tracking is enabled, or null.
      * @throws IOException
      */
-    public void execute(String arg) throws IOException, NutException {
+    public String execute(String param) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
         {
-            String[] params = {device.getName(), name};
-            if (arg != null && !arg.isEmpty()) {
-                String[] newArray = Arrays.copyOf(params, params.length + 1);
-                newArray[newArray.length - 1] = arg;
-                params = newArray;
+            String[] params;
+            if (param != null) {
+                params = new String[]{device.getName(), name, param};
+            } else {
+                params = new String[]{device.getName(), name};
             }
             String res = device.getClient().query("INSTCMD", params);
-            if(!res.equals("OK"))
+            if(!res.startsWith("OK"))
             {
                 // Normaly response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Command.execute : " + res);
             }
+            return device.getClient().getLastTrackingId();
         }
+        return null;
     }
 }
