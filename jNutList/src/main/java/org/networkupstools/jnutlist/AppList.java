@@ -28,28 +28,94 @@ public class AppList
 
     public static void main( String[] args )
     {
-        String host  = args.length>=1?args[0]:"localhost";
+        int    count = 0;
+        String host  = "localhost";
         int    port  = 3493;
-        String login = args.length>=3?args[2]:"";
-        String pass  = args.length>=4?args[3]:"";
+        String login = "";
+        String pass  = "";
 
-        String jks_path   = args.length>=5?args[4]:"";
-        String jks_pass   = args.length>=6?args[5]:"";
+        String jks_path   = ""; //args.length>=5?args[4]:"";
+        String jks_pass   = ""; //args.length>=6?args[5]:"";
         int    forceSSL   = 0;
         int    certVerify = 0;
 
+        String optName  = "";
+        String optValue = "";
+
         try {
-            if (args.length >= 2) {
-                port = Integer.valueOf(args[1]).intValue();
+            try {
+                for (count = 0; count < args.length; count++) {
+                    optName = args[count];
+
+                    if (optName.equals("--ssl-jks-path")) {
+                        if (count+1 < args.length) {
+                            jks_path = args[++count];
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--ssl-jks-pass")) {
+                        if (count+1 < args.length) {
+                            jks_pass = args[++count];
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--ssl-forceSSL")) {
+                        if (count+1 < args.length) {
+                            optValue = args[++count];
+                            forceSSL = Integer.valueOf(optValue);
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--ssl-certVerify")) {
+                        if (count+1 < args.length) {
+                            optValue = args[++count];
+                            certVerify = Integer.valueOf(optValue);
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    // Unsupported argument - go to basic four
+                    break;
+                }
+
+                // Default zero to four toggles:
+                //System.err.println("[DEBUG] Got to std params; count=" + count + " len=" + args.length);
+                optName = "host";
+                if (args.length > count) {
+                    host = args[count++];
+                }
+
+                optName = "port";
+                if (args.length > count) {
+                    optValue = args[count++];
+                    port = Integer.valueOf(optValue).intValue();
+                }
+
+                optName = "login";
+                if (args.length > count) {
+                    login = args[count++];
+                }
+
+                optName = "pass";
+                if (args.length > count) {
+                    pass = args[count++];
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid numeric argument '" + optValue + "' for " + optName);
             }
-            if (args.length >= 7) {
-                forceSSL = Integer.valueOf(args[6]).intValue();
-            }
-            if (args.length >= 8) {
-                certVerify = Integer.valueOf(args[7]).intValue();
-            }
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid numeric argument. Usage: AppList [host] [port] [login] [password] [jks_path] [jks_pass] [forceSSL] [certVerify]");
+        } catch (IllegalArgumentException iae) {
+            System.err.println(iae.toString() + ".\nUsage: AppList [--ssl-jks-path PATH] [--ssl-jks-pass PWD] [--ssl-forceSSL NUT] [--ssl-certVerify NUM] [host] [port] [login] [password]");
             System.exit(1);
         }
 

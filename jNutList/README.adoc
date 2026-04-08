@@ -20,7 +20,7 @@ jNutList can be run launching it in a console:
 
 	java -jar jNutList-x.x-xxx-jar-with-dependencies.jar
 
-Some parameters can be passed :
+Some parameters can be passed simply:
 
 	java -jar jNutList-x.x-jar-with-dependencies.jar host port login password
 
@@ -31,5 +31,13 @@ For example:
 By default, `host` is 'localhost', `port` is '3493' and `login` and `password`
 values are not specified.
 
-Further four options are JKS trust and key store path, and the password to the
+Further options can pe prepended with double-dash arguments, such as a set for
+`STARTTLS` support: are JKS trust and key store path, and the password to the
 store, and `forceSSL` (0/1) and `certVerify` (0/1) toggles.
+
+Generally speaking:
+
+	java -jar jNutList-x.x-jar-with-dependencies.jar \
+		[--ssl-jks-path PATH] [--ssl-jks-pass PWD] \
+		[--ssl-forceSSL NUT] [--ssl-certVerify NUM] \
+		[host] [port] [login] [password]

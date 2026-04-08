@@ -106,10 +106,10 @@ jobs:
             keytool -importkeystore -srckeystore "${TESTCERT_PATH_CLIENT}/client.p12" -srcstoretype PKCS12 -srcstorepass "${TESTCERT_CLIENT_PASS}" -srckeypass "${TESTCERT_CLIENT_PASS}" -destkeystore "${JNUTKS}" -deststoretype JKS -deststorepass "changeit" -destkeypass "changeit" -srcalias "${TESTCERT_CLIENT_NAME}" -destalias "${TESTCERT_CLIENT_NAME}" -v
             ls -la "${NUT_CONFPATH}/cert/jks/"
 
-            SSL_ARGS="${JNUTKS} changeit 1 1"
+            SSL_ARGS="--ssl-jks-path ${JNUTKS} --ssl-jks-pass changeit --ssl-forceSSL 1 --ssl-certVerify 1"
         fi
         upsdrvctl start
         upsd -DDDDDD &
         UPSD_PID="$!"
         trap 'kill $UPSD_PID ; upsdrvctl stop' 0 1 2 3 15
-        java -jar ./jNutList/target/jNutList-*-jar-with-dependencies.jar localhost "${NUT_PORT}" "admin" "${TESTPASS_ADMIN}" $SSL_ARGS || exit
+        java -jar ./jNutList/target/jNutList-*-jar-with-dependencies.jar $SSL_ARGS localhost "${NUT_PORT}" "admin" "${TESTPASS_ADMIN}" || exit
