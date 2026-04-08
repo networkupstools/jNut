@@ -77,6 +77,10 @@ public class Client {
      */
     private StringLineSocket socket = null;
 
+    /**
+     * SSL configuration
+     */
+    private SSLConfig sslConfig = null;
 
     /**
      * Get the host name or address to which client is (or will be) connected.
@@ -142,7 +146,13 @@ public class Client {
         this.port = port;
     }
 
+    public SSLConfig getSslConfig() {
+        return sslConfig;
+    }
 
+    public void setSslConfig(SSLConfig sslConfig) {
+        this.sslConfig = sslConfig;
+    }
 
     /**
      * Default constructor.
@@ -206,6 +216,15 @@ public class Client {
             disconnect();
 
         socket = new StringLineSocket(host, port);
+
+        if (sslConfig != null) {
+            String res = query("STARTTLS");
+            if (res.startsWith("OK STARTTLS")) {
+                socket.startTLS(sslConfig.createContext(), host, port);
+            } else if (sslConfig.isForceSSL()) {
+                throw new NutException("STARTTLS-FAILED", "Server does not support SSL but it is required");
+            }
+        }
 
         authenticate();
     }
@@ -572,6 +591,16 @@ public class Client {
         return (String[])list.toArray(new String[list.size()]);
     }
 
+    public String getTrackingResult(String id) throws IOException, NutException {
+        String res = get("TRACKING", id);
+        if (res == null) return null;
+        detectError(res);
+
+        if (res == "SUCCESS" || res == "PENDING")
+            return res;
+
+        throw new NutException(NutException.UnknownResponse, "Unknown response in getTrackingResult : " + res);
+    }
 
     /**
      * Returns the list of available devices from the NUT server.

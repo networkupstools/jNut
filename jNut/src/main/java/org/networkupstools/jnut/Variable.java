@@ -116,5 +116,59 @@ public class Variable {
         }
     }
 
-    // TODO Add query for type, enum and range values
+    /**
+     * Retrieve the variable type from UPSD.
+     * @return Variable type string.
+     * @throws IOException
+     * @throws NutException
+     */
+    public String getType() throws IOException, NutException {
+        if(device!=null && device.getClient()!=null)
+        {
+            String[] params = {device.getName(), name};
+            String res = device.getClient().get("TYPE", params);
+            // TYPE <ups> <var> <type>
+            return res;
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the list of possible values for an ENUM variable.
+     * @return List of values.
+     * @throws IOException
+     * @throws NutException
+     */
+    public String[] getEnumList() throws IOException, NutException {
+        if(device!=null && device.getClient()!=null)
+        {
+            String[] params = {device.getName(), name};
+            String[] res = device.getClient().list("ENUM", params);
+            if(res == null) return new String[0];
+            String[] list = new String[res.length];
+            for(int i=0; i<res.length; i++) {
+                // ENUM <ups> <var> "<value>"
+                list[i] = Client.extractDoublequotedValue(res[i]);
+            }
+            return list;
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the list of possible ranges for a RANGE variable.
+     * @return List of range strings or structured data.
+     * @throws IOException
+     * @throws NutException
+     */
+    public String[] getRangeList() throws IOException, NutException {
+        if(device!=null && device.getClient()!=null)
+        {
+            String[] params = {device.getName(), name};
+            String[] res = device.getClient().list("RANGE", params);
+            if(res == null) return new String[0];
+            return res; // RANGE <ups> <var> "<min>" "<max>"
+        }
+        return null;
+    }
 }

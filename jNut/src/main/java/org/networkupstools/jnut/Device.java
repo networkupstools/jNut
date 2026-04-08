@@ -107,10 +107,35 @@ public class Device {
 
     /**
      * This function doesn't do much by itself.  It is used by <i>upsmon</i> to make
-     * sure that master-level functions like FSD are available if necessary
+     * sure that master-level functions like FSD are available if necessary.
+     * <p>
+     * NOTE: API changed since NUT 2.8.0 to replace MASTER with PRIMARY
+     * (and backwards-compatible alias handling)
      * @throws IOException
      * @throws NutException
      */
+    public void primary() throws IOException, NutException {
+        if(client!=null)
+        {
+            try {
+                String res = client.query("PRIMARY", name);
+                if(!res.startsWith("OK"))
+                {
+                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.primary : " + res);
+                }
+            } catch (NutException ex) {
+                // Retry with MASTER if PRIMARY failed
+                master();
+            }
+        }
+    }
+
+    /**
+     * @deprecated Use primary() instead
+     * @throws IOException
+     * @throws NutException
+     */
+    @Deprecated
     public void master() throws IOException, NutException {
         if(client!=null)
         {
@@ -163,11 +188,36 @@ public class Device {
         if(client!=null)
         {
             String res = client.get("NUMLOGINS", name);
-            return res!=null?Integer.parseInt(res):-1;
+            // NUMLOGINS <ups> <value>
+            String[] parts = res.split(" ");
+            return parts.length >= 1 ? Integer.parseInt(parts[0]) : -1;
         }
         return -1;
     }
 
+    /**
+     * Return the list of clients which have done LOGIN for this UPS.
+     * @return List of client hostnames.
+     * @throws IOException
+     * @throws NutException
+     */
+    public String[] getClients() throws IOException, NutException {
+        if(client!=null)
+        {
+            String[] res = client.list("CLIENT", name);
+            if(res==null) return new String[0];
+            ArrayList/*<String>*/ list = new ArrayList/*<String>*/();
+            for(int i=0; i<res.length; i++)
+            {
+                // CLIENT <ups> <host>
+                String[] parts = res[i].split(" ");
+                if(parts.length >= 2)
+                    list.add(parts[1]);
+            }
+            return (String[])list.toArray(new String[list.size()]);
+        }
+        return null;
+    }
 
     /**
      * Return the list of device variables from the NUT server.
