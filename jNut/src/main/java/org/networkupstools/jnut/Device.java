@@ -125,7 +125,29 @@ public class Device {
                 }
             } catch (NutException ex) {
                 // Retry with MASTER if PRIMARY failed
-                master();
+                sendMasterCommand();
+            }
+        }
+    }
+
+    /**
+     * Internal helper to send the legacy MASTER command.
+     *
+     * This is used by the deprecated {@link #master()} method and as a
+     * compatibility fallback for {@link #primary()} when the PRIMARY
+     * command is not recognized by the server.
+     *
+     * @throws IOException
+     * @throws NutException
+     */
+    private void sendMasterCommand() throws IOException, NutException {
+        if(client!=null)
+        {
+            String res = client.query("MASTER", name);
+            if(!res.startsWith("OK"))
+            {
+                // Normaly response should be OK or ERR and nothing else.
+                throw new NutException(NutException.UnknownResponse, "Unknown response in Device.master : " + res);
             }
         }
     }
@@ -137,15 +159,7 @@ public class Device {
      */
     @Deprecated
     public void master() throws IOException, NutException {
-        if(client!=null)
-        {
-            String res = client.query("MASTER", name);
-            if(!res.startsWith("OK"))
-            {
-                // Normaly response should be OK or ERR and nothing else.
-                throw new NutException(NutException.UnknownResponse, "Unknown response in Device.master : " + res);
-            }
-        }
+        sendMasterCommand();
     }
 
     /**
