@@ -40,7 +40,7 @@ public class AppList
         int    forceSSL   = 0;
         int    certVerify = 0;
 
-        int    tracking   = 0;
+        Boolean tracking   = false;
 
         String setName  = "";
         String setValue = "";
@@ -59,7 +59,7 @@ public class AppList
                     optName = args[count];
 
                     if (optName.equals("-w")) {
-                        tracking = 1;
+                        tracking = true;
                         continue;
                     }
 
