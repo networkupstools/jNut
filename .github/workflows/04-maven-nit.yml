@@ -112,4 +112,4 @@ jobs:
         upsd -DDDDDD &
         UPSD_PID="$!"
         trap 'kill $UPSD_PID ; upsdrvctl stop' 0 1 2 3 15
-        java -jar ./jNutList/target/jNutList-*-jar-with-dependencies.jar $SSL_ARGS --setvar driver.debug 1 localhost "${NUT_PORT}" "admin" "${TESTPASS_ADMIN}" || exit
+        java -jar ./jNutList/target/jNutList-*-jar-with-dependencies.jar $SSL_ARGS -w --setvar driver.debug 1 localhost "${NUT_PORT}" "admin" "${TESTPASS_ADMIN}" || exit
