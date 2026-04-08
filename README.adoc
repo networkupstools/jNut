@@ -1,0 +1,29 @@
+jNut
+====
+
+A NUT Client for Java: library, sample command-line client, WAR suitable
+for deployment into web application servers to handle NUT via REST API.
+
+Java NUT Client files
+~~~~~~~~~~~~~~~~~~~~~
+
+This directory contains various NUT Client related java source files,
+originally written by Emilien Kia in 2011, sponsored by Eaton, and
+released under GPL v2 as part of NUT code base (repository separated
+as a standalone project in 2013).
+
+Submodules are:
+
+* "jNut": this directory contains maven project and source files for jNut,
+  which is a Java abstraction bundle to access NUT server(s).
+  You can use it in Java programs to access NUT's `upsd` data server
+  in a simple way, without having to know the NUT protocol.
+
+* "jNutList": this directory contains maven project and source files for
+  jNutList, a simple Java example program using jNut which connects to an
+  `upsd`, and lists its devices and their variables and commands.
+  Rough equivalent to `upsc` "example client" in NUT itself.
+
+* "jNutWebAPI": this directory contains maven project and source files for
+  jNutWebAPI, a simple Java web archive to access NUT information via REST
+  web services.
