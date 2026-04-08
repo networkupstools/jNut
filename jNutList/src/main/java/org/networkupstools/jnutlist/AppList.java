@@ -29,14 +29,29 @@ public class AppList
     public static void main( String[] args )
     {
         String host  = args.length>=1?args[0]:"localhost";
-        int    port  = args.length>=2?Integer.valueOf(args[1]).intValue():3493;
+        int    port  = 3493;
         String login = args.length>=3?args[2]:"";
         String pass  = args.length>=4?args[3]:"";
 
         String jks_path   = args.length>=5?args[4]:"";
         String jks_pass   = args.length>=6?args[5]:"";
-        int    forceSSL   = args.length>=7?Integer.valueOf(args[6]).intValue():0;
-        int    certVerify = args.length>=8?Integer.valueOf(args[7]).intValue():0;
+        int    forceSSL   = 0;
+        int    certVerify = 0;
+
+        try {
+            if (args.length >= 2) {
+                port = Integer.valueOf(args[1]).intValue();
+            }
+            if (args.length >= 7) {
+                forceSSL = Integer.valueOf(args[6]).intValue();
+            }
+            if (args.length >= 8) {
+                certVerify = Integer.valueOf(args[7]).intValue();
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid numeric argument. Usage: AppList [host] [port] [login] [password] [jks_path] [jks_pass] [forceSSL] [certVerify]");
+            System.exit(1);
+        }
 
         SSLConfig sslConfig = null;
 
