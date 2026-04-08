@@ -182,7 +182,7 @@ public class Client {
      */
     public void setTracking(boolean tracking) throws IOException, NutException {
         String res = query("SET TRACKING", tracking ? "ON" : "OFF");
-        if (res.startsWith("OK")) {
+        if (res != null && res.startsWith("OK")) {
             this.tracking = tracking;
         } else {
             // Normally response should be OK or ERR and nothing else.
