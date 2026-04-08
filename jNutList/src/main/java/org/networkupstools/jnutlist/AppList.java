@@ -1,6 +1,7 @@
 /* AppList.java
 
    Copyright (C) 2011 Eaton
+   Copyright (C) 2026- Jim Klimov <jimklimov+nut@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -175,11 +176,16 @@ public class AppList
                 );
         }
 
-        System.out.println( "jNutList connecting to " + login+":"+pass+"@"+host+":"+port + (sslConfig == null ? "" : " with STARTTLS mode") );
+        System.out.println( "jNutList connecting to " + login+":"+pass+"@"+host+":"+port
+            + (sslConfig == null ? "" : ", with STARTTLS mode")
+            + ", with" + (tracking ? "" : "out" ) + " TRACKING for SET VAR/INSTCMD"
+            );
 
         Client client = new Client();
         try {
             client.setSslConfig(sslConfig);
+            if (tracking)
+                client.setTracking(true);
             client.connect(host, port, login, pass);
 
             Device[] devs = client.getDeviceList();
