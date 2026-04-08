@@ -39,6 +39,14 @@ public class AppList
         int    forceSSL   = 0;
         int    certVerify = 0;
 
+        int    tracking   = 0;
+
+        String setName  = "";
+        String setValue = "";
+
+        String cmdName  = "";
+        String cmdValue = "";
+
         String optName  = "";
         String optValue = "";
 
@@ -46,6 +54,41 @@ public class AppList
             try {
                 for (count = 0; count < args.length; count++) {
                     optName = args[count];
+
+                    if (optName.equals("-w")) {
+                        tracking = 1;
+                        continue;
+                    }
+
+                    if (optName.equals("--setvar")) {
+                        if (count+2 < args.length) {
+                            setName  = args[++count];
+                            setValue = args[++count];
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--instcmd2")) {
+                        if (count+2 < args.length) {
+                            cmdName  = args[++count];
+                            cmdValue = args[++count];
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--instcmd")) {
+                        if (count+1 < args.length) {
+                            cmdName  = args[++count];
+                            cmdValue = "";
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
 
                     if (optName.equals("--ssl-jks-path")) {
                         if (count+1 < args.length) {
@@ -136,6 +179,7 @@ public class AppList
         try {
             client.setSslConfig(sslConfig);
             client.connect(host, port, login, pass);
+
             Device[] devs = client.getDeviceList();
             if(devs!=null)
             {
@@ -149,6 +193,16 @@ public class AppList
                         e.printStackTrace();
                     }
                     System.out.println("DEV " + dev.getName() + desc);
+
+                    if (!setName.isEmpty()) {
+                        Variable setVar = new Variable(setName, dev);
+                        setVar.setValue(setValue);
+                    }
+
+                    if (!cmdName.isEmpty()) {
+                        Command cmd = new Command(cmdName, dev);
+                        cmd.execute(cmdValue);
+                    }
 
                     try {
                         Variable[] vars = dev.getVariableList();
