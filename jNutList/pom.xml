@@ -16,6 +16,10 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- java.source.level>1.4</java.source.level -->
+    <java.source.level>8</java.source.level>
+    <!-- java.target.level>1.4</java.target.level -->
+    <java.target.level>8</java.target.level>
   </properties>
 
   <dependencies>
@@ -59,6 +63,16 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.15.0</version>
+        <configuration>
+          <source>${java.source.level}</source>
+          <target>${java.target.level}</target>
+        </configuration>
       </plugin>
     </plugins>
   </build>
