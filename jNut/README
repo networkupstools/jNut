@@ -16,7 +16,9 @@ sufficient configuration (internet connection, local repository) to let maven
 get all plugins to make processes.
 
 jNut is written in Java SE 1.4 and is tuned to be compiled to Java 1.4 code
-level so most of environment can use it.
+level so most of environment can use it. Settings in `pom.xml` are however
+higher (via properties you can change on ancient systems) so it is easy to
+build by default on modern toolkits.
 
 jNut building
 ^^^^^^^^^^^^^
