@@ -33,10 +33,27 @@ public class AppList
         String login = args.length>=3?args[2]:"";
         String pass  = args.length>=4?args[3]:"";
 
-        System.out.println( "jNutList connecting to " + login+":"+pass+"@"+host+":"+port );
+        String jks_path   = args.length>=5?args[4]:"";
+        String jks_pass   = args.length>=6?args[5]:"";
+        int    forceSSL   = args.length>=7?Integer.valueOf(args[6]).intValue():0;
+        int    certVerify = args.length>=8?Integer.valueOf(args[7]).intValue():0;
+
+        SSLConfig sslConfig = null;
+
+        if (!jks_path.equals("") && !jks_pass.equals("")) {
+            sslConfig = new SSLConfig_JKS(
+                forceSSL > 0,
+                certVerify > 0,
+                jks_path, jks_pass,
+                jks_path, jks_pass
+                );
+        }
+
+        System.out.println( "jNutList connecting to " + login+":"+pass+"@"+host+":"+port + (sslConfig == null ? "" : " with STARTTLS mode") );
 
         Client client = new Client();
         try {
+            client.setSslConfig(sslConfig);
             client.connect(host, port, login, pass);
             Device[] devs = client.getDeviceList();
             if(devs!=null)

@@ -30,3 +30,6 @@ For example:
 
 By default, `host` is 'localhost', `port` is '3493' and `login` and `password`
 values are not specified.
+
+Further four options are JKS trust and key store path, and the password to the
+store, and `forceSSL` (0/1) and `certVerify` (0/1) toggles.
