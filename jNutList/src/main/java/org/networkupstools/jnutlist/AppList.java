@@ -55,7 +55,7 @@ public class AppList
 
         SSLConfig sslConfig = null;
 
-        if (!jks_path.equals("") && !jks_pass.equals("")) {
+        if (!jks_path.isEmpty() && !jks_pass.isEmpty()) {
             sslConfig = new SSLConfig_JKS(
                 forceSSL > 0,
                 certVerify > 0,
