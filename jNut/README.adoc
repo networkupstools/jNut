@@ -47,8 +47,8 @@ You can generate jNut javadoc by typing:
 
 	mvn javadoc:javadoc
 
-Documentation will be generated in the `target/site/apidocs` subdirectory,
-and its entry point is located at `target/site/apidocs/index.html`.
+Documentation will be generated in the `target/reports/apidocs` subdirectory,
+and its entry point is located at `target/reports/apidocs/index.html`.
 
 Workspace cleaning
 ^^^^^^^^^^^^^^^^^^
