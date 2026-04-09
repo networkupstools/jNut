@@ -1,12 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.networkupstools</groupId>
   <artifactId>jNut-parent</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>pom</packaging>
 
   <name>jNut client project parent POM</name>
@@ -29,12 +26,13 @@
   <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
     <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
-    <!-- tag>${scmTag}</tag -->
+    <tag>${scmTag}</tag>
     <url>https://github.com/${gitHubRepo}</url>
   </scm>
 
   <properties>
     <gitHubRepo>networkupstools/jnut</gitHubRepo>
+    <scmTag>jNut-parent-1.0</scmTag>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- NOTE: For ancient system builds, 1.4 or 1.6 may be still viable;
          current compilers in 2020's do not accept those values anymore.
