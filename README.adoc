@@ -8,6 +8,13 @@ The `test-NIT.sh` script can be used to arrange a NUT driver+server setup
 using the NUT Integration Test suite script (you can
 find it in the main NUT repository).
 
+For more details about the NUT ecosystem, please see
+https://networkupstools.org/ and
+https://github.com/networkupstools/nut/
+
+Sources of this project can be found at
+https://github.com/networkupstools/jNut/
+
 Java NUT Client files
 ~~~~~~~~~~~~~~~~~~~~~
 
