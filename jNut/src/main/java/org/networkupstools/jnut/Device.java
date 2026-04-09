@@ -97,6 +97,9 @@ public class Device {
      * or an upsmon replacement.
      * @throws IOException
      * @throws NutException
+     * @see #becomePrimary
+     * @see #becomeSecondary
+     * @see Client#authenticate
      */
     public void login() throws IOException, NutException {
         if(client!=null)
@@ -111,22 +114,26 @@ public class Device {
     }
 
     /**
-     * This function doesn't do much by itself.  It is used by <i>upsmon</i> to make
-     * sure that master-level functions like FSD are available if necessary.
+     * This function does little by itself.
+     * It is used by <i>upsmon</i> to make sure that master-level functions
+     * like FSD are available if necessary.
      * <p>
      * NOTE: API changed since NUT 2.8.0 to replace MASTER with PRIMARY
      * (and backwards-compatible alias handling)
      * @throws IOException
      * @throws NutException
+     * @see #becomeSecondary
+     * @see #login
+     * @see Client#authenticate
      */
-    public void primary() throws IOException, NutException {
+    public void becomePrimary() throws IOException, NutException {
         if(client!=null)
         {
             try {
                 String res = client.query("PRIMARY", name);
                 if(!res.startsWith("OK"))
                 {
-                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.primary : " + res);
+                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.becomePrimary : " + res);
                 }
             } catch (NutException ex) {
                 // Retry with MASTER if PRIMARY failed
@@ -139,7 +146,7 @@ public class Device {
      * Internal helper to send the legacy MASTER command.
      * <p>
      * This is used by the deprecated {@link #master()} method and as a
-     * compatibility fallback for {@link #primary()} when the PRIMARY
+     * compatibility fallback for {@link #becomePrimary()} when the PRIMARY
      * command is not recognized by the (older) data server.
      *
      * @throws IOException
@@ -158,13 +165,49 @@ public class Device {
     }
 
     /**
-     * @deprecated Use primary() instead
+     * @deprecated Use {@link #becomePrimary} instead
      * @throws IOException
      * @throws NutException
+     * @see #becomeSecondary NOTE: There never was a "slave" command in jNut
      */
     @Deprecated
     public void master() throws IOException, NutException {
         sendMasterCommand();
+    }
+
+    /**
+     * This function does little by itself.
+     * It is used by <i>upsmon</i> to make sure that slave instances are known
+     * and waited for by the master instance to disconnect from the data server
+     * in case of FSD and mass shutdown.
+     * <p>
+     * NOTE: API changed since NUT 2.8.0 to replace SLAVE with SECONDARY
+     * (and backwards-compatible alias handling)
+     * @throws IOException
+     * @throws NutException
+     * @see #becomePrimary
+     * @see #login
+     * @see Client#authenticate
+     */
+    public void becomeSecondary() throws IOException, NutException {
+        if(client!=null)
+        {
+            try {
+                String res = client.query("SECONDARY", name);
+                if(!res.startsWith("OK"))
+                {
+                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.becomeSecondary : " + res);
+                }
+            } catch (NutException ex) {
+                // Retry with SLAVE if SECONDARY failed
+                String res = client.query("SLAVE", name);
+                if(!res.startsWith("OK"))
+                {
+                    // Normally response should be OK or ERR and nothing else.
+                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.becomeSecondary : " + res);
+                }
+            }
+        }
     }
 
     /**
