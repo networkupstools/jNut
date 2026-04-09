@@ -396,18 +396,28 @@ public class Client {
     /**
      * Merge an array of stings into on string, with a space ' ' separator.
      * @param str First string to merge
-     * @param strings Additionnal strings to merge
+     * @param strings Additional strings to merge
+     * @return The merged string, empty if no source string.
+     */
+    static String merge(String str, String[] strings) {
+        return merge(str, strings, " ");
+    }
+
+    /**
+     * Merge an array of stings into on string, with a specified separator.
+     * @param str First string to merge
+     * @param strings Additional strings to merge
      * @param sep Separator.
      * @return The merged string, empty if no source string.
      */
-    static String merge(String str, String[] strings)
+    static String merge(String str, String[] strings, String sep)
     {
         String res = str;
         if(strings!=null)
         {
             for(int n=0; n<strings.length; n++)
             {
-                res += " " + strings[n];
+                res += sep + strings[n];
             }
         }
         return res;
