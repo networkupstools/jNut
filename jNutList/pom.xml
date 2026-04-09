@@ -14,14 +14,6 @@
   <name>jNutList</name>
   <url>http://maven.apache.org</url>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- java.source.level>1.4</java.source.level -->
-    <java.source.level>8</java.source.level>
-    <!-- java.target.level>1.4</java.target.level -->
-    <java.target.level>8</java.target.level>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

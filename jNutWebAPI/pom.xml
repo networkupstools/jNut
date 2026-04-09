@@ -16,11 +16,6 @@
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- java.source.level>1.6</java.source.level -->
-        <java.source.level>8</java.source.level>
-        <!-- java.target.level>1.6</java.target.level -->
-        <java.target.level>8</java.target.level>
     </properties>
 
     <dependencies>
