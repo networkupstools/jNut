@@ -283,9 +283,57 @@ public class Client {
             } else if (sslConfig.isForceSSL()) {
                 throw new NutException("STARTTLS-FAILED", "Server does not support SSL but it is required");
             }
+
+            // Make sure handshake succeeded or abort early
+            // (there is currently no way for the server to
+            // report its fault to the client when connection
+            // is half-way secure):
+            if (!isValidProtocolVersion()) {
+                if (sslConfig.isForceSSL()) {
+                    throw new NutException("STARTTLS-FAILED", "SSL setup failed but it is required");
+                }
+            }
         }
 
         authenticate();
+    }
+
+    /** Query the (already established) connection to UPSD for its version.
+     * @return true if it is an "X(.Y)" number, false otherwise.
+     * @throws IOException
+     * @throws NutException
+     */
+    public boolean isValidProtocolVersion() throws IOException, NutException
+    {
+        return isValidProtocolVersion(null);
+    }
+
+    /** Query the (already established) connection to UPSD for its version
+     * and check it against given expectations.
+     * @param regex Regular expression to match the version against (defaults
+     *              to an "X(.Y)" number "^\\d+(?:\\.\\d+)?$" if NULL).
+     * @return true if it matches "regex", false otherwise.
+     * @throws IOException
+     * @throws NutException
+     */
+    public boolean isValidProtocolVersion(String regex) throws IOException, NutException
+    {
+        String res;
+
+        try {
+            res = query("PROTVER");
+        } catch (NutException e) {
+            // Deprecated and hidden, but may be what ancient NUT servers say
+            // May throw if the error is due to (non-)connection
+            res = query("NETVER");
+        }
+
+        if (regex == null) {
+            // Is it an X(.Y) number?
+            regex = "^\\d+(?:\\.\\d+)?$";
+        }
+
+        return res.matches(regex);
     }
 
     /**
