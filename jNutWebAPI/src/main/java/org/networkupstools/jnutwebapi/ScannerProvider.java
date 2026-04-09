@@ -33,7 +33,7 @@ import org.networkupstools.jnut.Scanner.DiscoveredDevice;
 
 
 /**
- * Apache Wink WS REST provider for nut-scanner..
+ * Apache Wink WS REST provider for nut-scanner.
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 @Path("/scan")

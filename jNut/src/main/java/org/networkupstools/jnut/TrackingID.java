@@ -24,7 +24,8 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Cookie given when performing async action, used to redeem result at a later date.
+ * Cookie given when performing async action, used to redeem the result
+ * at a later date.
  */
 public class TrackingID {
     private String id;

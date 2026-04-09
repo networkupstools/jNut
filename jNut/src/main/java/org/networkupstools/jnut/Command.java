@@ -25,13 +25,14 @@ import java.io.IOException;
  * Class representing a command of a device.
  * <p>
  * It can be used to retrieve description and execute commands.
- * A Command object can be retrieved from Device instance and can not be constructed directly.
+ * A Command object can be retrieved from {@link Device} instance
+ * and cannot be constructed directly.
  *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 public class Command {
     /**
-     * Device to which command is attached
+     * Device to which this command is attached
      */
     Device device = null;
 
@@ -68,7 +69,7 @@ public class Command {
     }
 
     /**
-     * Retrieve the command description from UPSD and store it in cache.
+     * Retrieve the command description from UPSD and store it in a cache.
      * @return Command description
      * @throws IOException
      */
@@ -93,7 +94,9 @@ public class Command {
 
     /**
      * Execute the instant command with an optional parameter.
-     * @param param Command parameter (may be null to not send it; however an empty string may be a valid value for server side).
+     * @param param Command parameter (the value may be null to not send it;
+     *              however, an empty string may be a valid value for server
+     *              side, so a {@code ""} argument would be sent).
      * @return Tracking ID if tracking is enabled, or null.
      * @throws IOException
      */
@@ -104,7 +107,9 @@ public class Command {
     /**
      * Execute the instant command with an optional parameter,
      * and optionally waiting for completion.
-     * @param param Command parameter (may be null to not send it; however an empty string may be a valid value for server side).
+     * @param param Command parameter (the value may be null to not send it;
+     *              however, an empty string may be a valid value for server
+     *              side, so a {@code ""} argument would be sent).
      * @param waitIntervalSec Interval between checks in seconds (if >= 1).
      * @param waitMaxCount Maximum number of checks (if >= 1).
      * @return Tracking ID if tracking is enabled (and not waiting), or null.
@@ -129,7 +134,7 @@ public class Command {
             String res = client.query("INSTCMD", params);
             if(!res.startsWith("OK"))
             {
-                // Normaly response should be OK or ERR and nothing else.
+                // Normally the response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Command.execute : " + res);
             }
             TrackingID tid = client.getLastTrackingId();

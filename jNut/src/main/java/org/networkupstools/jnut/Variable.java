@@ -25,13 +25,14 @@ import java.io.IOException;
  * Class representing a variable of a device.
  * <p>
  * It can be used to get and set its value (if possible).
- * A Variable object can be retrieved from Device instance and can not be constructed directly.
+ * A Variable object can be retrieved from a {@link Device} instance
+ * and cannot be constructed directly.
  *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 public class Variable {
     /**
-     * Device to which variable is attached
+     * Device to which this variable is attached
      */
     Device device = null;
 
@@ -68,7 +69,7 @@ public class Variable {
     }
 
     /**
-     * Retrieve the variable value from UPSD and store it in cache.
+     * Retrieve the variable value from UPSD and store it in a cache.
      * @return Variable value
      * @throws IOException
      */
@@ -83,7 +84,7 @@ public class Variable {
     }
 
     /**
-     * Retrieve the variable description from UPSD and store it in cache.
+     * Retrieve the variable description from UPSD and store it in a cache.
      * @return Variable description
      * @throws IOException
      */
@@ -99,7 +100,8 @@ public class Variable {
 
     /**
      * Set the variable value.
-     * Note the new value can be applied with a little delay depending of UPSD and connection.
+     * Note the new value can be applied with a little delay,
+     * depending on UPSD and connection.
      * @param value New value for the variable
      * @return Tracking ID if tracking is enabled, or null.
      * @throws IOException
@@ -131,7 +133,7 @@ public class Variable {
             String res = client.query("SET", params);
             if(!res.startsWith("OK"))
             {
-                // Normaly response should be OK or ERR and nothing else.
+                // Normally the response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Variable.setValue : " + res);
             }
             TrackingID tid = client.getLastTrackingId();

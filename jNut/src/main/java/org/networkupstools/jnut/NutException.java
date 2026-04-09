@@ -21,15 +21,22 @@ package org.networkupstools.jnut;
 /**
  * Class representing a NUT exception.
  * <p>
- * Instance are thrown when an UPSD returns an error with an "ERR" directive.
- * Moreover it can ben thrown with some extra errors like:
+ * Instances of this class are thrown when an UPSD returns an error with
+ * an "ERR" directive.
+ * Moreover, it can be thrown with some extra errors like:
  * <ul>
- *  <li>UNKNOWN-RESPONSE : The response is not understood
+ *  <li>UNKNOWN-RESPONSE: The response is not understood
+ *  <li>SERVER-NOT-CONNECTED: The {@link Client} is not connected to the
+ *      data server yet
  * </ul>
  * <p>
- * A Nut exception has a (standard java exception message) message which correspond
- * to error code returns by UPSD (like 'ACCESS-DENIED', 'UNKNOWN-UPS' ...).
- * An extra string embed a more descriptive english message.
+ * A NutException has a standard Java exception message which corresponds
+ * to error code returned by UPSD (like 'ACCESS-DENIED', 'UNKNOWN-UPS' ...)
+ * or defined in the class (like 'UNKNOWN-RESPONSE', 'SERVER-NOT-CONNECTED').
+ * An extra string can be used to embed a more descriptive English message.
+ * <p>
+ * The {@link #is(String)} method can be used to test if the exception
+ * corresponds to a specific well-known error code.
  *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
@@ -93,9 +100,9 @@ public class NutException extends java.lang.Exception{
     }
 
     /**
-     * Test is the exception corresponds to the specified name.
+     * Test is the exception corresponds to the specified well-known problem name.
      * @param name Name to test
-     * @return True if exception corresponds.
+     * @return True if the exception corresponds.
      */
     public boolean is(String name) {
         return getMessage()!=null&&getMessage().equals(name);
