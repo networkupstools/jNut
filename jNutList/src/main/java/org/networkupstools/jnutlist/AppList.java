@@ -221,7 +221,7 @@ public class AppList
                                 System.out.println("  VAR " + var.getName() + res );
 
                                 try {
-                                    if (!setName.isEmpty() && setName.equals(var.getValue())) {
+                                    if (!setName.isEmpty() && setName.equals(var.getName())) {
                                         if (tracking)
                                             var.setValue(setValue, 1, 10);
                                         else
@@ -236,7 +236,7 @@ public class AppList
                                 }
 
                                 try {
-                                    if (!setName.isEmpty() && setName.equals(var.getValue())) {
+                                    if (!setName.isEmpty() && setName.equals(var.getName())) {
                                         var = dev.getVariable(setName);
                                         res = " = " + var.getValue() + " (" + var.getDescription() + ")";
                                         System.out.println("  UPDATED: VAR " + var.getName() + res );
