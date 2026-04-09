@@ -10,7 +10,11 @@
 # similar OS platforms (expected tools, NUT programs in PATH, etc.)
 # Do not expect TOO much from NUT binaries, as they can be packaged and
 # a decade old.
-# You can provide NUT_BUILDDIR location to use a custom build of NUT.
+#
+# You can provide NUT_BUILDDIR location to use a custom build of NUT,
+# and `export TEST_NIT_SUBSHELL=true` to stop this script just after
+# starting the drivers and data server, e.g. so you can run the client
+# separately in a debugger.
 #
 # Uses "dumb shell" syntax though, for maximum portability across decades.
 #
@@ -221,6 +225,12 @@ NUT_DEBUG_LEVEL="${OLD_NDL}"
 
 echo "[TEST-NIT] Sleeping so the server can fully start" >&2
 sleep 5
+
+if [ x"$TEST_NIT_SUBSHELL" = xtrue ] ; then
+    echo "[TEST-NIT] Starting interactive shell with prepared NIT env, exit it to proceed with JAR test:" >&2
+    echo "+" java -jar "${TEST_JAR}" $SSL_ARGS $SETVAR_ARGS "localhost" "${NUT_PORT}" "admin" "${TESTPASS_ADMIN}" >&2
+    bash --login
+fi
 
 echo "[TEST-NIT] Starting jNutList client '${TEST_JAR}' for the test" >&2
 RES=0
