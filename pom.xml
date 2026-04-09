@@ -36,12 +36,32 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- NOTE: For ancient system builds, 1.4 or 1.6 may be still viable;
          current compilers in 2020's do not accept those values anymore.
+          <java.source.level>1.6</java.source.level>
+          <java.target.level>1.6</java.target.level>
       -->
-    <java.source.level>8</java.source.level>
-    <java.target.level>8</java.target.level>
+    <maven.compiler.release>8</maven.compiler.release>
   </properties>
 
-  <dependencyManagement>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.15.0</version>
+                    <configuration>
+                        <compilerArgs>
+                            <!-- Suppress warnings about obsolete
+                                 Java versions during the build: -->
+                            <arg>-Xlint:-options</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>${project.groupId}</groupId>
