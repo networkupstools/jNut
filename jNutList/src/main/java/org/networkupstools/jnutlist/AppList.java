@@ -52,6 +52,7 @@ public class AppList
 
         String optName  = "";
         String optValue = "";
+        int exitCode = 0;
 
         try {
             try {
@@ -231,6 +232,7 @@ public class AppList
                                     e.printStackTrace();
                                     if (setApplied == null)
                                         setApplied = false;
+                                    exitCode = 1;
                                 }
 
                                 try {
@@ -248,6 +250,7 @@ public class AppList
                             System.out.println("  NULL VAR");
                     } catch(NutException e) {
                         e.printStackTrace();
+                        exitCode = 1;
                     }
 
                     try {
@@ -279,6 +282,7 @@ public class AppList
                                     if (cmdApplied == null)
                                         cmdApplied = false;
                                     e.printStackTrace();
+                                    exitCode = 1;
                                 }
                             }
                         }
@@ -286,6 +290,7 @@ public class AppList
                             System.out.println("  NULL CMD");
                     } catch(NutException e) {
                         e.printStackTrace();
+                        exitCode = 1;
                     }
                 }
             }
@@ -294,6 +299,7 @@ public class AppList
 
         }catch(Exception e){
             e.printStackTrace();
+            exitCode = 1;
         }
 
         if (cmdApplied != null)
@@ -301,5 +307,7 @@ public class AppList
 
         if (setApplied != null)
             System.out.println("  Assigned VAR '" + setName + "', succeeded at least once: " + setApplied.toString());
+
+	System.exit(exitCode);
     }
 }
