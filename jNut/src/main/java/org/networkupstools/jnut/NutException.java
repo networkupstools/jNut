@@ -39,6 +39,10 @@ public class NutException extends java.lang.Exception{
 
     public static String DriverNotConnected = "DRIVER-NOT-CONNECTED";
 
+    /** Not a NUT message, but internal report when {@link Client#isConnected()}
+     *  returns {@code false} during a query (preparing to `get`, etc.) */
+    public static String ServerNotConnected = "SERVER-NOT-CONNECTED";
+
     public String extra = "";
 
     public NutException()
