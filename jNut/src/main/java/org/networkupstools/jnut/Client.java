@@ -290,8 +290,9 @@ public class Client {
             // is half-way secure):
             if (!isValidProtocolVersion()) {
                 if (sslConfig.isForceSSL()) {
-                    throw new NutException("STARTTLS-FAILED", "SSL setup failed but it is required");
+                    throw new NutException("STARTTLS-FAILED", "STARTTLS setup claimed to succeed, but protocol version check in the secured session failed, and SSL is required");
                 }
+                // TODO: Drop SSL context or restart the connection as plaintext if SSL is not required?
             }
         }
 
@@ -748,7 +749,7 @@ public class Client {
 
     public String getTrackingResult(TrackingID id) throws IOException, NutException {
         if (id == null || !id.isValid()) return null;
-        String res = get("TRACKING", id.getId());
+        String res = query("GET TRACKING", id.getId());
         if (res == null) return null;
         detectError(res);
 
