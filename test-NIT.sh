@@ -8,6 +8,8 @@
 # which calls this as PATH="`pwd`/nut/tests/NIT:${PATH}" ./test-NIT.sh)
 # and is initially geared towards CI runs and developer reproduction on
 # similar OS platforms (expected tools, NUT programs in PATH, etc.)
+# Do not expect TOO much from NUT binaries, as they can be packaged and
+# a decade old.
 # You can provide NUT_BUILDDIR location to use a custom build of NUT.
 #
 # Uses "dumb shell" syntax though, for maximum portability across decades.
@@ -19,6 +21,10 @@
 #       2026- Jim Klimov <jimklimov+nut@gmail.com>
 #
 # License: GPLv2+
+
+# We are specifically interested in seeing the server side of dialogs,
+# not so much general NUT_DEBUG_LEVEL that would add noise from drivers:
+[ -n "${NUT_DEBUG_LEVEL_UPSD}" ] || NUT_DEBUG_LEVEL_UPSD=6
 
 # Normalize incoming paths, e.g. avoid `~` chars for home-dir builds if we can:
 if [ -n "${NUT_BUILDDIR-}" ] ; then
@@ -188,8 +194,9 @@ UPSD_PID=""
 cleanup() {
     RES=$?
     echo "[TEST-NIT] Stopping NUT daemons to finish the sandbox" >&2
+    echo "[TEST-NIT] UPSD_PID='$UPSD_PID'" >&2
     if [ -n "${UPSD_PID}" ]; then
-        kill $UPSD_PID
+        kill $UPSD_PID || pkill upsd
     fi
     upsdrvctl stop
     echo "[TEST-NIT] Stopped NUT daemons to finish the sandbox, exiting: $RES" >&2
@@ -201,8 +208,16 @@ echo "[TEST-NIT] Starting NUT daemons to prepare the sandbox" >&2
 upsdrvctl start || { echo "[WARNING] NUT drivers did not start" >&2 ; sleep 1; }
 sleep 1
 
-upsd -DDDDDD &
+OLD_NDL="${NUT_DEBUG_LEVEL-}"
+if [ -n "$NUT_DEBUG_LEVEL_UPSD" ] ; then
+    NUT_DEBUG_LEVEL="$NUT_DEBUG_LEVEL_UPSD"
+    export NUT_DEBUG_LEVEL
+fi
+upsd -FF &
 UPSD_PID="$!"
+echo "[TEST-NIT] UPSD_PID='$UPSD_PID'" >&2
+
+NUT_DEBUG_LEVEL="${OLD_NDL}"
 
 echo "[TEST-NIT] Sleeping so the server can fully start" >&2
 sleep 5
