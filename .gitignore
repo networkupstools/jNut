@@ -7,3 +7,6 @@
 
 # Maven build workspace #
 target/
+
+# NIT generated configs, if running from workspace root
+tmp/
