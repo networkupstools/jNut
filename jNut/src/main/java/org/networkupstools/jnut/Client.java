@@ -749,7 +749,7 @@ public class Client {
 
     public String getTrackingResult(TrackingID id) throws IOException, NutException {
         if (id == null || !id.isValid()) return null;
-        String res = get("TRACKING", id.getId());
+        String res = query("GET TRACKING", id.getId());
         if (res == null) return null;
         detectError(res);
 
