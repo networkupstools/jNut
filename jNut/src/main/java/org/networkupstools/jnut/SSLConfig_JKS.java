@@ -10,10 +10,10 @@ import java.security.KeyStore;
  * SSL configuration with added options specific for Java KeyStore (JKS/PKCS12).
  */
 public class SSLConfig_JKS extends SSLConfig {
-    private String trustStorePath;
-    private String trustStorePassword;
-    private String keyStorePath;
-    private String keyStorePassword;
+    private final String trustStorePath;
+    private final String trustStorePassword;
+    private final String keyStorePath;
+    private final String keyStorePassword;
 
     public SSLConfig_JKS(boolean forceSSL, boolean certVerify,
                          String trustStorePath, String trustStorePassword,
