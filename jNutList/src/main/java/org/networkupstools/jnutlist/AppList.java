@@ -1,6 +1,7 @@
 /* AppList.java
 
    Copyright (C) 2011 Eaton
+   Copyright (C) 2026- Jim Klimov <jimklimov+nut@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,16 +29,166 @@ public class AppList
 
     public static void main( String[] args )
     {
-        String host  = args.length>=1?args[0]:"localhost";
-        int    port  = args.length>=2?Integer.valueOf(args[1]).intValue():3493;
-        String login = args.length>=3?args[2]:"";
-        String pass  = args.length>=4?args[3]:"";
+        int    count = 0;
+        String host  = "localhost";
+        int    port  = 3493;
+        String login = "";
+        String pass  = "";
 
-        System.out.println( "jNutList connecting to " + login+":"+pass+"@"+host+":"+port );
+        String jks_path   = ""; //args.length>=5?args[4]:"";
+        String jks_pass   = ""; //args.length>=6?args[5]:"";
+        int    forceSSL   = 0;
+        int    certVerify = 0;
+
+        boolean tracking   = false;
+
+        String setName  = "";
+        String setValue = "";
+        Boolean setApplied = null;
+
+        String cmdName  = "";
+        String cmdValue = "";
+        Boolean cmdApplied = null;
+
+        String optName  = "";
+        String optValue = "";
+        int exitCode = 0;
+
+        try {
+            try {
+                for (count = 0; count < args.length; count++) {
+                    optName = args[count];
+
+                    if (optName.equals("-w")) {
+                        tracking = true;
+                        continue;
+                    }
+
+                    if (optName.equals("--setvar")) {
+                        if (count+2 < args.length) {
+                            setName  = args[++count];
+                            setValue = args[++count];
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--instcmd2")) {
+                        if (count+2 < args.length) {
+                            cmdName  = args[++count];
+                            cmdValue = args[++count];
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--instcmd")) {
+                        if (count+1 < args.length) {
+                            cmdName  = args[++count];
+                            cmdValue = "";
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--ssl-jks-path")) {
+                        if (count+1 < args.length) {
+                            jks_path = args[++count];
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--ssl-jks-pass")) {
+                        if (count+1 < args.length) {
+                            jks_pass = args[++count];
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--ssl-forceSSL")) {
+                        if (count+1 < args.length) {
+                            optValue = args[++count];
+                            forceSSL = Integer.valueOf(optValue);
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    if (optName.equals("--ssl-certVerify")) {
+                        if (count+1 < args.length) {
+                            optValue = args[++count];
+                            certVerify = Integer.valueOf(optValue);
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Missing parameter for " + optName);
+                        }
+                    }
+
+                    // Unsupported argument - go to basic four
+                    break;
+                }
+
+                // Default zero to four toggles:
+                //System.err.println("[DEBUG] Got to std params; count=" + count + " len=" + args.length);
+                optName = "host";
+                if (args.length > count) {
+                    host = args[count++];
+                }
+
+                optName = "port";
+                if (args.length > count) {
+                    optValue = args[count++];
+                    port = Integer.valueOf(optValue).intValue();
+                }
+
+                optName = "login";
+                if (args.length > count) {
+                    login = args[count++];
+                }
+
+                optName = "pass";
+                if (args.length > count) {
+                    pass = args[count++];
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid numeric argument '" + optValue + "' for " + optName);
+            }
+        } catch (IllegalArgumentException iae) {
+            System.err.println(iae.toString() + ".\nUsage: AppList [--ssl-jks-path PATH] [--ssl-jks-pass PWD] [--ssl-forceSSL NUT] [--ssl-certVerify NUM] [host] [port] [login] [password]");
+            System.exit(1);
+        }
+
+        SSLConfig sslConfig = null;
+
+        if (!jks_path.isEmpty() && !jks_pass.isEmpty()) {
+            sslConfig = new SSLConfig_JKS(
+                forceSSL > 0,
+                certVerify > 0,
+                jks_path, jks_pass,
+                jks_path, jks_pass
+                );
+        }
+
+        System.out.println( "jNutList connecting to " + login+":"+pass+"@"+host+":"+port
+            + (sslConfig == null ? "" : ", with STARTTLS mode")
+            + ", with" + (tracking ? "" : "out" ) + " TRACKING for SET VAR/INSTCMD"
+            );
 
         Client client = new Client();
         try {
+            client.setSslConfig(sslConfig);
             client.connect(host, port, login, pass);
+            if (tracking)
+                client.setTracking(true);
+
             Device[] devs = client.getDeviceList();
             if(devs!=null)
             {
@@ -68,12 +219,38 @@ public class AppList
                                     e.printStackTrace();
                                 }
                                 System.out.println("  VAR " + var.getName() + res );
+
+                                try {
+                                    if (!setName.isEmpty() && setName.equals(var.getName())) {
+                                        if (tracking)
+                                            var.setValue(setValue, 1, 10);
+                                        else
+                                            var.setValue(setValue);
+                                        setApplied = true;
+                                    }
+                                } catch(NutException e) {
+                                    e.printStackTrace();
+                                    if (setApplied == null)
+                                        setApplied = false;
+                                    exitCode = 1;
+                                }
+
+                                try {
+                                    if (!setName.isEmpty() && setName.equals(var.getName())) {
+                                        var = dev.getVariable(setName);
+                                        res = " = " + var.getValue() + " (" + var.getDescription() + ")";
+                                        System.out.println("  UPDATED: VAR " + var.getName() + res );
+                                    }
+                                } catch(NutException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                         else
                             System.out.println("  NULL VAR");
                     } catch(NutException e) {
                         e.printStackTrace();
+                        exitCode = 1;
                     }
 
                     try {
@@ -92,12 +269,28 @@ public class AppList
                                     e.printStackTrace();
                                 }
                                 System.out.println("  CMD " + cmd.getName() + res);
+
+                                try {
+                                    if (!cmdName.isEmpty() && cmdName.equals(cmd.getName())) {
+                                        if (tracking)
+                                            cmd.execute(cmdValue, 1, 10);
+                                        else
+                                            cmd.execute(cmdValue);
+                                        cmdApplied = true;
+                                    }
+                                } catch(NutException e) {
+                                    if (cmdApplied == null)
+                                        cmdApplied = false;
+                                    e.printStackTrace();
+                                    exitCode = 1;
+                                }
                             }
                         }
                         else
                             System.out.println("  NULL CMD");
                     } catch(NutException e) {
                         e.printStackTrace();
+                        exitCode = 1;
                     }
                 }
             }
@@ -106,7 +299,15 @@ public class AppList
 
         }catch(Exception e){
             e.printStackTrace();
+            exitCode = 1;
         }
 
+        if (cmdApplied != null)
+            System.out.println("  Called CMD '" + cmdName + "', succeeded at least once: " + cmdApplied.toString());
+
+        if (setApplied != null)
+            System.out.println("  Assigned VAR '" + setName + "', succeeded at least once: " + setApplied.toString());
+
+	System.exit(exitCode);
     }
 }

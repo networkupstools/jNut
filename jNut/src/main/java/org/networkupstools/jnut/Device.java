@@ -22,17 +22,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * Class representing a device attached to a Client.
+ * Class representing a device attached to a {@link Client} session.
  * <p>
- * It can retrieve its description, its number of logins, its variable and command lists.
- * A Device object can be retrieved from Client instance and can not be constructed directly.
+ * It can retrieve its description, its number of logins,
+ * its variable and command lists.
+ * <p>
+ * A Device object can be retrieved from a {@link Client} instance,
+ * and cannot be constructed directly.
  *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 public class Device {
 
     /**
-     * Client to which device is attached
+     * Client to which this device is attached
      */
     Client client = null;
 
@@ -69,7 +72,7 @@ public class Device {
     }
 
     /**
-     * Retrieve the device description from UPSD and store it in cache.
+     * Retrieve the device description from UPSD and store it in a cache.
      * @return Device description
      * @throws IOException
      */
@@ -82,16 +85,21 @@ public class Device {
     }
 
     /**
-     * Log in to the ups.
+     * Log in to the UPS to assume a special role which matters
+     * to orchestration of the server lifecycle and its other clients.
+     * NOTE: Call {@link Client#authenticate()} first.
      * <p>
      * Use this to log the fact that a system is drawing power from this UPS.
-     * The <i>upsmon</i> master will wait until the count of attached systems reaches
-     * 1 - itself.  This allows the slaves to shut down first.
+     * The <i>upsmon</i> primary system will wait until the count of attached
+     * systems reaches 1 - itself.  This allows the secondaries to shut down first.
      * <p>
      * NOTE: You probably shouldn't send this command unless you are upsmon,
-     * or a upsmon replacement.
+     * or an upsmon replacement.
      * @throws IOException
      * @throws NutException
+     * @see #becomePrimary
+     * @see #becomeSecondary
+     * @see Client#authenticate
      */
     public void login() throws IOException, NutException {
         if(client!=null)
@@ -99,26 +107,105 @@ public class Device {
             String res = client.query("LOGIN", name);
             if(!res.startsWith("OK"))
             {
-                // Normaly response should be OK or ERR and nothing else.
+                // Normally the response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Device.login : " + res);
             }
         }
     }
 
     /**
-     * This function doesn't do much by itself.  It is used by <i>upsmon</i> to make
-     * sure that master-level functions like FSD are available if necessary
+     * This function does little by itself.
+     * It is used by <i>upsmon</i> to make sure that master-level functions
+     * like FSD are available if necessary.
+     * <p>
+     * NOTE: API changed since NUT 2.8.0 to replace MASTER with PRIMARY
+     * (and backwards-compatible alias handling)
+     * @throws IOException
+     * @throws NutException
+     * @see #becomeSecondary
+     * @see #login
+     * @see Client#authenticate
+     */
+    public void becomePrimary() throws IOException, NutException {
+        if(client!=null)
+        {
+            try {
+                String res = client.query("PRIMARY", name);
+                if(!res.startsWith("OK"))
+                {
+                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.becomePrimary : " + res);
+                }
+            } catch (NutException ex) {
+                // Retry with MASTER if PRIMARY failed
+                sendMasterCommand();
+            }
+        }
+    }
+
+    /**
+     * Internal helper to send the legacy MASTER command.
+     * <p>
+     * This is used by the deprecated {@link #master()} method and as a
+     * compatibility fallback for {@link #becomePrimary()} when the PRIMARY
+     * command is not recognized by the (older) data server.
+     *
      * @throws IOException
      * @throws NutException
      */
-    public void master() throws IOException, NutException {
+    private void sendMasterCommand() throws IOException, NutException {
         if(client!=null)
         {
             String res = client.query("MASTER", name);
             if(!res.startsWith("OK"))
             {
-                // Normaly response should be OK or ERR and nothing else.
+                // Normally the response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Device.master : " + res);
+            }
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #becomePrimary} instead
+     * @throws IOException
+     * @throws NutException
+     * @see #becomeSecondary NOTE: There never was a "slave" command in jNut
+     */
+    @Deprecated
+    public void master() throws IOException, NutException {
+        sendMasterCommand();
+    }
+
+    /**
+     * This function does little by itself.
+     * It is used by <i>upsmon</i> to make sure that slave instances are known
+     * and waited for by the master instance to disconnect from the data server
+     * in case of FSD and mass shutdown.
+     * <p>
+     * NOTE: API changed since NUT 2.8.0 to replace SLAVE with SECONDARY
+     * (and backwards-compatible alias handling)
+     * @throws IOException
+     * @throws NutException
+     * @see #becomePrimary
+     * @see #login
+     * @see Client#authenticate
+     */
+    public void becomeSecondary() throws IOException, NutException {
+        if(client!=null)
+        {
+            try {
+                String res = client.query("SECONDARY", name);
+                if(!res.startsWith("OK"))
+                {
+                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.becomeSecondary : " + res);
+                }
+            } catch (NutException ex) {
+                // Retry with SLAVE if SECONDARY failed
+                String res = client.query("SLAVE", name);
+                if(!res.startsWith("OK"))
+                {
+                    // Normally response should be OK or ERR and nothing else.
+                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.becomeSecondary : " + res);
+                }
             }
         }
     }
@@ -126,13 +213,14 @@ public class Device {
     /**
      * Set the "forced shutdown" flag.
      * <p>
-     * <i>upsmon</i> in master mode is the primary user of this function.  It sets this
-     * "forced shutdown" flag on any UPS when it plans to power it off.  This is
-     * done so that slave systems will know about it and shut down before the
-     * power disappears.
+     * <i>upsmon</i> in {@code PRIMARY} mode is the main user of this function.
+     * On the data server side, it sets the "forced shutdown" flag on any
+     * UPS when it plans to power it off.
+     * This is done so that {@code SECONDARY} systems will know about it, and
+     * would shut down before the power disappears.
      * <p>
      * Setting this flag makes "FSD" appear in a STATUS request for this UPS.
-     * Finding "FSD" in a status request should be treated just like a "OB LB".
+     * Finding "FSD" in a status request should be treated just like an "OB LB".
      * <p>
      * It should be noted that FSD is currently a latch - once set, there is
      * no way to clear it short of restarting upsd or dropping then re-adding
@@ -147,7 +235,7 @@ public class Device {
             String res = client.query("FSD", name);
             if(!res.startsWith("OK"))
             {
-                // Normaly response should be OK or ERR and nothing else.
+                // Normally the response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Device.setForcedShutdown : " + res);
             }
         }
@@ -155,7 +243,7 @@ public class Device {
 
     /**
      * Return the number of clients which have done LOGIN for this UPS.
-     * Force to retrieve it from UPSD and store it in cache.
+     * Force to retrieve it from UPSD and store it in a cache.
      * @return Number of clients, -1 if error.
      * @throws IOException
      */
@@ -163,11 +251,44 @@ public class Device {
         if(client!=null)
         {
             String res = client.get("NUMLOGINS", name);
-            return res!=null?Integer.parseInt(res):-1;
+            // NUMLOGINS <ups> <value>
+            String[] parts = res.split(" ");
+            if (parts.length >= 1) {
+                try {
+                    return Integer.parseInt(parts[0]);
+                } catch (NumberFormatException e) {
+                    return -1;
+                }
+            } else {
+                return -1;
+            }
         }
         return -1;
     }
 
+    /**
+     * Return the list of clients which have done LOGIN for this UPS.
+     * @return List of client hostnames.
+     * @throws IOException
+     * @throws NutException
+     */
+    public String[] getClients() throws IOException, NutException {
+        if(client!=null)
+        {
+            String[] res = client.list("CLIENT", name);
+            if(res==null) return new String[0];
+            ArrayList/*<String>*/ list = new ArrayList/*<String>*/();
+            for(int i=0; i<res.length; i++)
+            {
+                // CLIENT <ups> <host>
+                String[] parts = res[i].split(" ");
+                if(parts.length >= 2)
+                    list.add(parts[1]);
+            }
+            return (String[])list.toArray(new String[list.size()]);
+        }
+        return null;
+    }
 
     /**
      * Return the list of device variables from the NUT server.
@@ -272,8 +393,8 @@ public class Device {
 
         String[] params = {this.name, name};
         String res = client.get("CMDDESC", params);
-        // Note: there is no way to test if the command is really available or not
-        // because a GET CMDDESC ups badcmdname does not return an error.
+        // Note: there is no way to test if the command is really available or not,
+        // because a `GET CMDDESC ups bad_cmd_name` does not return an error.
         return new Command(name, this);
     }
 }

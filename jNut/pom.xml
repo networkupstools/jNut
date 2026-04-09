@@ -11,23 +11,13 @@
   <artifactId>jNut</artifactId>
   <packaging>jar</packaging>
 
-  <name>jNut</name>
-  <url>http://maven.apache.org</url>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- java.source.level>1.4</java.source.level -->
-    <java.source.level>8</java.source.level>
-    <!-- java.target.level>1.4</java.target.level -->
-    <java.target.level>8</java.target.level>
-  </properties>
+  <name>jNut client library</name>
+  <url>https://maven.apache.org</url>
 
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

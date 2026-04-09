@@ -4,6 +4,9 @@ jNut
 A NUT Client for Java: library, sample command-line client, WAR suitable
 for deployment into web application servers to handle NUT via REST API.
 
+The `test-NIT.sh` script can be used to arrange a NUT driver+server setup
+using the NUT Integration Test suite script (see main NUT repository).
+
 Java NUT Client files
 ~~~~~~~~~~~~~~~~~~~~~
 

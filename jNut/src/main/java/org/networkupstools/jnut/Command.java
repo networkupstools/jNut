@@ -1,6 +1,7 @@
 /* Command.java
 
    Copyright (C) 2011 Eaton
+   Copyright (C) 2026- Jim Klimov <jimklimov+nut@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,13 +25,14 @@ import java.io.IOException;
  * Class representing a command of a device.
  * <p>
  * It can be used to retrieve description and execute commands.
- * A Command object can be retrieved from Device instance and can not be constructed directly.
+ * A Command object can be retrieved from {@link Device} instance
+ * and cannot be constructed directly.
  *
  * @author <a href="mailto:EmilienKia@eaton.com">Emilien Kia</a>
  */
 public class Command {
     /**
-     * Device to which command is attached
+     * Device to which this command is attached
      */
     Device device = null;
 
@@ -67,7 +69,7 @@ public class Command {
     }
 
     /**
-     * Retrieve the command description from UPSD and store it in cache.
+     * Retrieve the command description from UPSD and store it in a cache.
      * @return Command description
      * @throws IOException
      */
@@ -82,19 +84,67 @@ public class Command {
     }
 
     /**
-     * Execute the instant command.
+     * Execute the instant command without any optional argument.
+     * @return Tracking ID if tracking is enabled, or null.
      * @throws IOException
      */
-    public void execute() throws IOException, NutException {
+    public TrackingID execute() throws IOException, NutException {
+        return execute(null, -1, -1);
+    }
+
+    /**
+     * Execute the instant command with an optional parameter.
+     * @param param Command parameter (the value may be null to not send it;
+     *              however, an empty string may be a valid value for server
+     *              side, so a {@code ""} argument would be sent).
+     * @return Tracking ID if tracking is enabled, or null.
+     * @throws IOException
+     */
+    public TrackingID execute(String param) throws IOException, NutException {
+        return execute(param, -1, -1);
+    }
+
+    /**
+     * Execute the instant command with an optional parameter,
+     * and optionally waiting for completion.
+     * @param param Command parameter (the value may be null to not send it;
+     *              however, an empty string may be a valid value for server
+     *              side, so a {@code ""} argument would be sent).
+     * @param waitIntervalSec Interval between checks in seconds (if >= 1).
+     * @param waitMaxCount Maximum number of checks (if >= 1).
+     * @return Tracking ID if tracking is enabled (and not waiting), or null.
+     * @throws IOException
+     * @throws NutException
+     */
+    public TrackingID execute(String param, int waitIntervalSec, int waitMaxCount) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
         {
-            String[] params = {device.getName(), name};
-            String res = device.getClient().query("INSTCMD", params);
-            if(!res.equals("OK"))
+            Client client = device.getClient();
+            boolean doWait = waitIntervalSec >= 1 && waitMaxCount >= 1;
+            if (doWait) {
+                client.enableTrackingModeOnce();
+            }
+
+            String[] params;
+            if (param != null) {
+                params = new String[]{device.getName(), name, param};
+            } else {
+                params = new String[]{device.getName(), name};
+            }
+            String res = client.query("INSTCMD", params);
+            if(!res.startsWith("OK"))
             {
-                // Normaly response should be OK or ERR and nothing else.
+                // Normally the response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Command.execute : " + res);
             }
+            TrackingID tid = client.getLastTrackingId();
+            if (doWait && tid != null && tid.isValid()) {
+                if (client.waitTrackingResult(tid, waitIntervalSec, waitMaxCount)) {
+                    return null;
+                }
+            }
+            return tid;
         }
+        return null;
     }
 }

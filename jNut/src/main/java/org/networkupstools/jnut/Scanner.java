@@ -33,8 +33,9 @@ import java.util.Set;
 /**
  * jNut scanner.
  * Wrap calls to nut-scanner in java.
- *
- * Just, instantiate it, set options and nut-scanner path, then scan.
+ * <p>
+ * Just instantiate it, set options and {@code nut-scanner} program path,
+ * then {@link #scan}.
  * <pre>
  * Scanner scanner = new Scanner();
  * scanner.setExecName("/usr/local/ups/bin/nut-scanner");
@@ -73,7 +74,7 @@ public class Scanner {
     /**
      * Result of a scan.
      * @see Scanner#scan()
-     * Used to retrieve informations about devices found by a scan and
+     * Used to retrieve information about devices found by a scan and
      * their properties
      */
     public static class DiscoveredDevice {
@@ -83,7 +84,7 @@ public class Scanner {
 
         /**
          * Constructor.
-         * Can not be used by others than Scanner.
+         * Cannot be used by other consumerss than Scanner.
          * @param drv Driver
          * @param props Extra properties
          */
@@ -95,7 +96,7 @@ public class Scanner {
         }
 
         /**
-         * Retrieve the name of driver used by device.
+         * Retrieve the name of the driver used by the device.
          * @return Driver name
          */
         public String getDriver() {
@@ -208,7 +209,7 @@ public class Scanner {
     }
 
     /**
-     * Set nut-scanner executable name (with location if any).
+     * Set the nut-scanner executable name (with location if any).
      * @param value nut-scanner executable name
      */
     public void setExecName(String value) {
@@ -216,7 +217,7 @@ public class Scanner {
     }
 
     /**
-     * Retrieve nut-scanner executable path.
+     * Retrieve the nut-scanner executable path.
      * The directory in which nut-scanner will be launched.
      * @return nut-scanner executable path
      */
@@ -225,7 +226,7 @@ public class Scanner {
     }
 
     /**
-     * Set nut-scanner executable path.
+     * Set the nut-scanner executable path.
      * The directory in which nut-scanner will be launched.
      * @param value nut-scanner executable path
      */
@@ -243,7 +244,7 @@ public class Scanner {
 
     /**
      * Set the scanner extra parameters.
-     * @param map Map of parameters.
+     * @param config Map of parameters.
      */
     public void setConfig(Map config) {
         this.config = config;
@@ -372,14 +373,14 @@ public class Scanner {
     }
 
     /**
-     * Parse a line of result from nut-scanner and convert it to DiscoveredDevice.
-     * @param line Line of nut-scanner result.
+     * Parse a line of a result from nut-scanner and
+     * convert it to {@link DiscoveredDevice}.
+     * @param line Line of a nut-scanner result.
      * @return The corresponding DiscoveredDevice, or null if a problem occurs.
      */
     static DiscoveredDevice scanLine(String line) {
         String driver = null;
         Map conf = new HashMap/*<String,String>*/();
-
 
         // Find driver name
         int pos = line.indexOf(':');
@@ -472,7 +473,7 @@ public class Scanner {
                     }
                     break;
                 }
-                default: //Out of known states, must not occurs
+                default: //Out of known states, must not occur
                 {
                     // Bad format
                     return null;
@@ -495,7 +496,7 @@ public class Scanner {
             }
             case 2: // Quoted value
             {
-                // should not occurs : not closed quoted value
+                // should not occur: not closed quoted value
                 conf.put(key, Client.unescape(temp));
                 break;
             }
@@ -510,7 +511,7 @@ public class Scanner {
                 // Do nothing, thats ok
                 break;
             }
-            default: //Out of known states, must not occurs
+            default: //Out of known states, must not occur
             {
                 break;
             }
@@ -521,7 +522,7 @@ public class Scanner {
 
     /**
      * Generate an array of String representing command arguments to pass to
-     * nut-scanner, when launching it.
+     * nut-scanner when launching it.
      * @return Array of String of command arguments.
      */
     String[] generateCommandParameters() {

@@ -1,6 +1,7 @@
 /* Client.java
 
    Copyright (C) 2011 Eaton
+   Copyright (C) 2026- Jim Klimov <jimklimov+nut@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,20 +20,21 @@
 package org.networkupstools.jnut;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
- * A jNut client is start point to dialog to UPSD.
+ * A jNut client is the starting point to the dialog to UPSD.
  * It can connect to an UPSD then retrieve its device list.
- * It support authentication by login/password.
+ * It supports authentication by login/password and STARTTLS for security.
  * <p>
  * You can directly create and connect a client by using the
- * Client(String host, int port, String login, String passwd) constructor
- * or use a three phase construction:
+ * {@code Client(String host, int port, String login, String passwd)}
+ * constructor, or use a three-phase construction:
  * <ul>
  *  <li>empty constructor
- *  <li>setting host, port, login and password with setters
+ *  <li>setting host, port, login, and password with setters
  *  <li>call empty connect()
  * </ul>
  * <p>
@@ -40,7 +42,7 @@ import java.util.ArrayList;
  * If the connection is closed, attached objects must not be used anymore (GC).
  * <p>
  * Note: The jNut Client does not support any reconnection nor ping mechanism,
- * so the calling application must know the UPSD can timeout the connection.
+ * so the calling application must know that the UPSD can time out the connection.
  * <p>
  * Note: Retrieved values are not valid along the time, they are valid at the
  * precise moment they are retrieved.
@@ -77,9 +79,24 @@ public class Client {
      */
     private StringLineSocket socket = null;
 
+    /**
+     * SSL configuration
+     * @see SSLConfig_JKS
+     */
+    private SSLConfig sslConfig = null;
 
     /**
-     * Get the host name or address to which client is (or will be) connected.
+     * Tracking activation status
+     */
+    private boolean tracking = false;
+
+    /**
+     * Tracking ID for last SET or INSTCMD
+     */
+    private TrackingID lastTrackingId = null;
+
+    /**
+     * Get the host name or address to which the client is (or will be) connected.
      * @return Host name or address.
      */
     public String getHost() {
@@ -87,7 +104,8 @@ public class Client {
     }
 
     /**
-     * Set the host name (or address) to which the client will intend to connect to at next connection.
+     * Set the host name (or address) to which the client will intend
+     * to connect to at the next connection.
      * @param host New host name or address.
      */
     public void setHost(String host) {
@@ -127,7 +145,7 @@ public class Client {
     }
 
     /**
-     * Get the port to which client is (or will be) connected.
+     * Get the port to which the client is (or will be) connected.
      * @return Port number.
      */
     public int getPort() {
@@ -135,14 +153,60 @@ public class Client {
     }
 
     /**
-     * Set the port to which client is (or will be) connected.
+     * Set the port to which the client is (or will be) connected.
      * @param port Port number.
      */
     public void setPort(int port) {
         this.port = port;
     }
 
+    public SSLConfig getSslConfig() {
+        return sslConfig;
+    }
 
+    /**
+     * Set the SSL configuration for the client;
+     * should do so before calling {@link #connect}.
+     * @param sslConfig SSL configuration object.
+     * @see SSLConfig_JKS
+     */
+    public void setSslConfig(SSLConfig sslConfig) {
+        this.sslConfig = sslConfig;
+    }
+
+    /**
+     * Get the tracking activation status.
+     * @return Tracking activation status.
+     */
+    public boolean isTrackingEnabled() {
+        return tracking;
+    }
+
+    /**
+     * Set the tracking activation status; requires that
+     * the client connection is already active (call this
+     * after {@link #connect} succeeds).
+     * @param tracking New tracking activation status.
+     * @throws IOException
+     * @throws NutException
+     */
+    public void setTracking(boolean tracking) throws IOException, NutException {
+        String res = query("SET TRACKING", tracking ? "ON" : "OFF");
+        if (res != null && res.startsWith("OK")) {
+            this.tracking = tracking;
+        } else {
+            // Normally response should be OK or ERR and nothing else.
+            throw new NutException(NutException.UnknownResponse, "Unknown response in Client.setTracking : " + res);
+        }
+    }
+
+    /**
+     * Get the tracking ID for last SET or INSTCMD.
+     * @return Tracking ID.
+     */
+    public TrackingID getLastTrackingId() {
+        return lastTrackingId;
+    }
 
     /**
      * Default constructor.
@@ -154,7 +218,7 @@ public class Client {
     /**
      * Connection constructor.
      * Construct the Client object and intend to connect.
-     * Throw an exception if cannot connect.
+     * Throw an exception if we cannot connect.
      * @param host Host to which connect.
      * @param port IP port.
      * @param login Login to use to connect to UPSD.
@@ -166,8 +230,10 @@ public class Client {
     }
 
     /**
-     * Intent to connect and authenticate to an UPSD with specified parameters.
-     * Throw an exception if cannot connect.
+     * Intent to connect and authenticate to an UPSD with specified parameters
+     * (remembers them as class instance fields).
+     * <p>
+     * Throw an exception if we cannot connect.
      * @param host Host to which connect.
      * @param port IP port.
      * @param login Login to use to connect to UPSD.
@@ -183,8 +249,10 @@ public class Client {
     }
 
     /**
-     * Intent to connect to an UPSD with specified parameters without authentication.
-     * Throw an exception if cannot connect.
+     * Intent to connect to an UPSD with specified parameters
+     * (remembers them as class instance fields) without authentication.
+     * <p>
+     * Throw an exception if we cannot connect.
      * @param host Host to which connect.
      * @param port IP port.
      */
@@ -196,8 +264,9 @@ public class Client {
     }
 
     /**
-     * Connection to UPSD with already specified parameters.
-     * Throw an exception if cannot connect.
+     * Connection to UPSD with already specified parameters
+     * (including a call to {@link #authenticate} if so configured).
+     * Throw an exception if we cannot connect.
      */
     public void connect() throws IOException, UnknownHostException, NutException
     {
@@ -207,12 +276,24 @@ public class Client {
 
         socket = new StringLineSocket(host, port);
 
+        if (sslConfig != null) {
+            String res = query("STARTTLS");
+            if (res.startsWith("OK STARTTLS")) {
+                socket.startTLS(sslConfig.createContext(), host, port);
+            } else if (sslConfig.isForceSSL()) {
+                throw new NutException("STARTTLS-FAILED", "Server does not support SSL but it is required");
+            }
+        }
+
         authenticate();
     }
 
     /**
-     * Intend to authenticate with specified login and password, overriding
-     * already defined ones.
+     * Intend to authenticate with a specified login and password, overriding
+     * already defined ones (remembers them as class instance fields).
+     * <p>
+     * NOTE: This is an operation different from {@link Device#login} which lets
+     * a program like {@code upsmon} assume a special role on a specific device.
      * @param login
      * @param passwd
      * @throws IOException
@@ -226,7 +307,10 @@ public class Client {
     }
 
     /**
-     * Intend to authenticate with alread set login and password.
+     * Intend to authenticate with an already set login and password.
+     * <p>
+     * NOTE: This is an operation different from {@link Device#login} which lets
+     * a program like {@code upsmon} assume a special role on a specific device.
      * @throws IOException
      * @throws NutException
      */
@@ -238,7 +322,7 @@ public class Client {
             String res = query("USERNAME", login);
             if(!res.startsWith("OK"))
             {
-                // Normaly response should be OK or ERR and nothing else.
+                // Normally response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Client.connect (USERNAME) : " + res);
             }
         }
@@ -248,7 +332,7 @@ public class Client {
             String res = query("PASSWORD", passwd);
             if(!res.startsWith("OK"))
             {
-                // Normaly response should be OK or ERR and nothing else.
+                // Normally response should be OK or ERR and nothing else.
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Client.connect (PASSWORD) : " + res);
             }
         }
@@ -256,8 +340,10 @@ public class Client {
 
     /**
      * Test if the client is connected to the UPSD.
-     * Note: it does not detect if the connection have been closed by server.
+     * Note: it does not actively probe to detect if the connection has
+     * been closed by the server -- just reports if we had opened it or not.
      * @return True if connected.
+     * @see NutException#ServerNotConnected {@link NutException#ServerNotConnected} can be thrown by methods which fail this check
      */
     public boolean isConnected()
     {
@@ -310,18 +396,28 @@ public class Client {
     /**
      * Merge an array of stings into on string, with a space ' ' separator.
      * @param str First string to merge
-     * @param strings Additionnal strings to merge
+     * @param strings Additional strings to merge
+     * @return The merged string, empty if no source string.
+     */
+    static String merge(String str, String[] strings) {
+        return merge(str, strings, " ");
+    }
+
+    /**
+     * Merge an array of stings into on string, with a specified separator.
+     * @param str First string to merge
+     * @param strings Additional strings to merge
      * @param sep Separator.
      * @return The merged string, empty if no source string.
      */
-    static String merge(String str, String[] strings)
+    static String merge(String str, String[] strings, String sep)
     {
         String res = str;
         if(strings!=null)
         {
             for(int n=0; n<strings.length; n++)
             {
-                res += " " + strings[n];
+                res += sep + strings[n];
             }
         }
         return res;
@@ -348,13 +444,14 @@ public class Client {
     }
 
     /**
-     * Intend to extract a value from its doublequoted and escaped representation.
+     * Intend to extract a value from its double-quoted and escaped
+     * representation.
      * @param source Source string to convert.
      * @return Extracted value
      */
     static String extractDoublequotedValue(String source)
     {
-        // Test doublequote at begin and end of string, then remove them.
+        // Test double-quote at beginning and end of string, then remove them.
         if(!(source.startsWith("\"") && source.endsWith("\"")))
             return null;
         source = source.substring(1, source.length()-1);
@@ -369,9 +466,9 @@ public class Client {
      */
     static String escape(String str)
     {
-        // Replace a backslash by two backslash (regexp)
+        // Replace a backslash with two backslashes (regexp)
         str = str.replaceAll("\\\\", "\\\\\\\\");
-        // Replace a doublequote by backslash-doublequote (regexp)
+        // Replace a double-quote by backslash-double-quote (regexp)
         str = str.replaceAll("\"", "\\\\\"");
         return str;
     }
@@ -383,16 +480,16 @@ public class Client {
      */
     static String unescape(String str)
     {
-        // Replace a backslash-doublequote by doublequote (regexp)
+        // Replace a backslash-double-quote by double-quote (regexp)
         str = str.replaceAll("\\\\\"", "\"");
-        // Replace two backslash by a backslash (regexp)
+        // Replace two backslashes with a backslash (regexp)
         str = str.replaceAll("\\\\\\\\", "\\\\");
         return str;
     }
 
     /**
      * Detect an UPSD ERR line.
-     * If found, parse it, construct and throw an NutException
+     * If found, parse it, then construct and throw a NutException
      * @param str Line to analyse.
      * @throws NutException
      */
@@ -408,14 +505,16 @@ public class Client {
                 case 3:
                     throw new NutException(arr[1], arr[2]);
                 default:
+                    if (!isConnected())
+                        throw new NutException(NutException.ServerNotConnected, "Not connected");
                     throw new NutException();
             }
         }
     }
 
     /**
-     * Send a query line then read the response.
-     * Helper around query(String).
+     * Send a query line, then read the response.
+     * Helper around {@link #query(String)}.
      * @param query Query to send.
      * @param subquery Sub query to send.
      * @return The reply.
@@ -427,11 +526,11 @@ public class Client {
     }
 
     /**
-     * Send a query line then read the response.
-     * Helper around query(String, String ...).
+     * Send a query line, then read the response.
+     * Helper around {@link #query(String, String ...)}.
      * @param query Query to send.
      * @param subquery Sub query to send.
-     * @param params Optionnal additionnal parameters.
+     * @param params Optional additional parameters.
      * @return The reply.
      * @throws IOException
      */
@@ -441,9 +540,9 @@ public class Client {
     }
 
     /**
-     * Send a query line then read the response.
+     * Send a query line, then read the response.
      * @param query Query to send.
-     * @param params Optionnal additionnal parameters.
+     * @param params Optional additional parameters.
      * @return The reply.
      * @throws IOException
      */
@@ -454,24 +553,33 @@ public class Client {
     }
 
     /**
-     * Send a query line then read the response.
+     * Send a query line, then read the response.
      * @param query Query to send.
      * @return The reply.
      * @throws IOException
      */
     protected String query(String query) throws IOException, NutException
     {
-        if(!isConnected())
-            return null;
+        if(!isConnected()) {
+            throw new NutException(NutException.ServerNotConnected, "Not connected");
+            //return null;
+        }
 
         socket.write(query);
         String res = socket.read();
         detectError(res);
+
+        if (res.startsWith("OK TRACKING ")) {
+            lastTrackingId = new TrackingID(res.substring(12));
+        } else if (res.equals("OK")) {
+            lastTrackingId = new TrackingID("");
+        }
+
         return res;
     }
 
     /**
-     * Send a GET query line then read the reply and validate the response.
+     * Send a GET query line, then read the reply and validate the response.
      * @param subcmd GET subcommand to send.
      * @param param Extra parameters
      * @return GET result return by UPSD, without the subcommand and param prefix.
@@ -484,7 +592,7 @@ public class Client {
     }
 
     /**
-     * Send a GET query line then read the reply and validate the response.
+     * Send a GET query line, then read the reply and validate the response.
      * @param subcmd GET subcommand to send.
      * @param params Eventual extra parameters.
      * @return GET result return by UPSD, without the subcommand and param prefix.
@@ -492,8 +600,10 @@ public class Client {
      */
     protected String get(String subcmd, String [] params) throws IOException, NutException
     {
-        if(!isConnected())
-            return null;
+        if(!isConnected()) {
+            throw new NutException(NutException.ServerNotConnected, "Not connected");
+            //return null;
+        }
 
         subcmd = merge(subcmd, params);
         socket.write("GET " + subcmd);
@@ -512,7 +622,7 @@ public class Client {
     }
 
     /**
-     * Send a LIST query line then read replies and validate them.
+     * Send a LIST query line, then read replies and validate them.
      * @param subcmd LIST subcommand to send.
      * @return LIST results return by UPSD, without the subcommand and param prefix.
      * @throws IOException
@@ -523,7 +633,7 @@ public class Client {
     }
 
     /**
-     * Send a LIST query line then read replies and validate them.
+     * Send a LIST query line, then read replies and validate them.
      * @param subcmd LIST subcommand to send.
      * @param param Extra parameters.
      * @return LIST results return by UPSD, without the subcommand and param prefix.
@@ -536,7 +646,7 @@ public class Client {
     }
 
     /**
-     * Send a LIST query line then read replies and validate them.
+     * Send a LIST query line, then read replies and validate them.
      * @param subcmd LIST subcommand to send.
      * @param params Eventual extra parameters.
      * @return LIST results return by UPSD, without the subcommand and param prefix.
@@ -544,8 +654,10 @@ public class Client {
      */
     protected String[] list(String subcmd, String [] params) throws IOException, NutException
     {
-        if(!isConnected())
-            return null;
+        if(!isConnected()) {
+            throw new NutException(NutException.ServerNotConnected, "Not connected");
+            //return null;
+        }
 
         subcmd = merge(subcmd, params);
         socket.write("LIST " + subcmd);
@@ -572,6 +684,68 @@ public class Client {
         return (String[])list.toArray(new String[list.size()]);
     }
 
+    /**
+     * Enable TRACKING mode on this connection if it is not already enabled.
+     * @return True if tracking is enabled.
+     * @throws IOException
+     * @throws NutException
+     */
+    public boolean enableTrackingModeOnce() throws IOException, NutException {
+        if (tracking) {
+            return true;
+        }
+        setTracking(true);
+        return tracking;
+    }
+
+    public String getTrackingResult(TrackingID id) throws IOException, NutException {
+        if (id == null || !id.isValid()) return null;
+        String res = get("TRACKING", id.getId());
+        if (res == null) return null;
+        detectError(res);
+
+        if ("SUCCESS".equals(res) || "PENDING".equals(res))
+            return res;
+
+        throw new NutException(NutException.UnknownResponse, "Unknown response in getTrackingResult : " + res);
+    }
+
+    /**
+     * Wait for a tracking ID to complete.
+     * @param id Tracking ID to wait for.
+     * @param waitIntervalSec Interval between checks in seconds.
+     * @param waitMaxCount Maximum number of checks.
+     * @return True if the command succeeded, false if timed out or failed.
+     * @throws IOException
+     * @throws NutException
+     */
+    public boolean waitTrackingResult(TrackingID id, int waitIntervalSec, int waitMaxCount) throws IOException, NutException {
+        if (id == null || !id.isValid() || waitIntervalSec < 1 || waitMaxCount < 1) {
+            return false;
+        }
+
+        while (waitMaxCount > 0) {
+            String status = getTrackingResult(id);
+            if ("SUCCESS".equals(status)) {
+                return true;
+            } else if ("PENDING".equals(status)) {
+                // Still waiting...
+            } else if (status != null && status.startsWith("ERR")) {
+                // Command failed
+                return false;
+            }
+
+            try {
+                Thread.sleep(waitIntervalSec * 1000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+            waitMaxCount--;
+        }
+
+        return false;
+    }
 
     /**
      * Returns the list of available devices from the NUT server.

@@ -24,6 +24,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Class representing a socket, internally used to communicate with UPSD.
@@ -97,8 +101,25 @@ class StringLineSocket {
         }
     }
 
+    public boolean startTLS(SSLContext sslContext, String host, int port) throws IOException {
+        if (isConnected()) {
+            SSLSocketFactory factory = sslContext.getSocketFactory();
+            SSLSocket sslSocket = (SSLSocket) factory.createSocket(socket, host, port, true);
+            // Enable hostname verification to prevent man-in-the-middle attacks
+            SSLParameters sslParameters = sslSocket.getSSLParameters();
+            sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+            sslSocket.setSSLParameters(sslParameters);
+            sslSocket.startHandshake();
+            socket = sslSocket;
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            writer = new OutputStreamWriter(socket.getOutputStream());
+            return true;
+        }
+        return false;
+    }
+
     /**
-     * Test if the soecket is connected.
+     * Test if the socket is connected.
      * @return True if connected.
      */
     public boolean isConnected() {

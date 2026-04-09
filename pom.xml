@@ -8,7 +8,33 @@
   <artifactId>jNut-parent</artifactId>
   <version>0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>JNut global project</name>
+
+  <name>jNut client project parent POM</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- NOTE: For ancient system builds, 1.4 or 1.6 may be still viable;
+         current compilers in 2020's do not accept those values anymore.
+      -->
+    <java.source.level>8</java.source.level>
+    <java.target.level>8</java.target.level>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>jNut</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.13.2</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <modules>
     <module>jNut</module>

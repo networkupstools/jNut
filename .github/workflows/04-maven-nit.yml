@@ -69,4 +69,14 @@ jobs:
     - name: Maven build and test
       run: mvn package
 
-    # TODO: Setup NUT, run client (add in-tree script for that and call it)
+    # Setup NUT, run client (add in-tree script for that and call it)
+    # NOTE: We use binaries from the package for speedier turnaround
+    # TOTHINK: No SSL self-reporting before NUT v2.8.5 ...
+    - name: Checkout NUT sources (for NIT script)
+      run: |
+        git clone --depth=1 https://github.com/networkupstools/nut
+
+    - if: matrix.os == 'ubuntu-latest'
+      name: Test jNut with NIT
+      run: |
+        PATH="`pwd`/nut/tests/NIT:${PATH}" ./test-NIT.sh

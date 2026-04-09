@@ -10,7 +10,7 @@ It is a little example application to show how to use jNut.
 jNutList building
 ^^^^^^^^^^^^^^^^^
 
-As jNut, jNutList is a maven project so a maven environment must be set.
+As jNut, jNutList is a maven project so a maven environment must be set up.
 Please reffer to jNut building notes.
 
 jNutList running
@@ -20,7 +20,7 @@ jNutList can be run launching it in a console:
 
 	java -jar jNutList-x.x-xxx-jar-with-dependencies.jar
 
-Some parameters can be passed :
+Some parameters can be passed simply:
 
 	java -jar jNutList-x.x-jar-with-dependencies.jar host port login password
 
@@ -30,3 +30,21 @@ For example:
 
 By default, `host` is 'localhost', `port` is '3493' and `login` and `password`
 values are not specified.
+
+Further options can pe prepended with double-dash arguments, such as a set for
+`STARTTLS` support: are JKS trust and key store path, and the password to the
+store, and `forceSSL` (0/1) and `certVerify` (0/1) toggles.
+
+You can also send instant command (with an optional argument) or set a variable,
+optionally "TRACKING" (waiting for server confirmation of completion) with `-w`,
+but note this applies to all devices found on that 'host:port' -- so should be
+really limited to CI tests with simulated devices.
+
+Generally speaking:
+
+	java -jar jNutList-x.x-jar-with-dependencies.jar \
+		[-w] [--setvar VAR VAL ] \
+		[--instcmd CMD | --instcmd2 CMD ARG] \
+		[--ssl-jks-path PATH] [--ssl-jks-pass PWD] \
+		[--ssl-forceSSL NUT] [--ssl-certVerify NUM] \
+		[host] [port] [login] [password]
