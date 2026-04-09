@@ -5,12 +5,13 @@ A NUT Client for Java: library, sample command-line client, WAR suitable
 for deployment into web application servers to handle NUT via REST API.
 
 The `test-NIT.sh` script can be used to arrange a NUT driver+server setup
-using the NUT Integration Test suite script (see main NUT repository).
+using the NUT Integration Test suite script (you can
+find it in the main NUT repository).
 
 Java NUT Client files
 ~~~~~~~~~~~~~~~~~~~~~
 
-This directory contains various NUT Client related java source files,
+This directory contains various NUT Client related Java source files,
 originally written by Emilien Kia in 2011, sponsored by Eaton, and
 released under GPL v2 as part of NUT code base (repository separated
 as a standalone project in 2013).
@@ -32,5 +33,5 @@ Submodules are:
   Rough equivalent to `upsc` "example client" in NUT itself.
 
 * "jNutWebAPI": this directory contains maven project and source files for
-  jNutWebAPI, a simple Java web archive to access NUT information via REST
-  web services.
+  jNutWebAPI, a simple Java web archive which allows to provide
+  access to NUT information via REST web services.

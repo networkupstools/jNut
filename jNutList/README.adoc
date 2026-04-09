@@ -4,14 +4,15 @@ jNutList example application
 This directory contains source files for the `jNutList` application, a
 rough equivalent to `upsc` "example client" in the NUT sources.
 
-It allows to connect to an UPSD then retrieve devices and their variables.
+It allows connecting to an UPSD, then retrieving devices and their variables,
+as well as setting writeable variable values or calling instant commands.
 It is a little example application to show how to use jNut.
 
 jNutList building
 ^^^^^^^^^^^^^^^^^
 
-As jNut, jNutList is a maven project so a maven environment must be set up.
-Please reffer to jNut building notes.
+Like jNut, jNutList is a maven project, so a maven environment must be set up.
+Please refer to jNut building notes for technical details.
 
 jNutList running
 ^^^^^^^^^^^^^^^^
@@ -37,7 +38,7 @@ store, and `forceSSL` (0/1) and `certVerify` (0/1) toggles.
 
 You can also send instant command (with an optional argument) or set a variable,
 optionally "TRACKING" (waiting for server confirmation of completion) with `-w`,
-but note this applies to all devices found on that 'host:port' -- so should be
+but note this applies to all devices found on that 'host:port' - so should be
 really limited to CI tests with simulated devices.
 
 Generally speaking:

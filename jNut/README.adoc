@@ -1,35 +1,39 @@
 jNut library
 ~~~~~~~~~~~~
 
-This directory contains source files for the jNut library,
-which is a Java abstraction bundle to access NUT server(s).
-You can use it in Java programs to access NUT's upsd data server in a simple
-way, without having to know the NUT protocol.
+This directory contains source files for the jNut library, which is a
+Java abstraction bundle to access NUT server(s).
+
+You can use it in Java programs to access NUT's upsd data server in a
+simple way, without having to know any nuances of the NUT protocol.
 
 jNut building requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-jNut requires to be build :
-- A Java JDK 6 correctly set in environment (ie bin folder in path)
-- A Maven 3 installation set in environment (ie bin folder in path) with
-sufficient configuration (internet connection, local repository) to let maven
-get all plugins to make processes.
+jNut requires to be built:
 
-jNut is written in Java SE 1.4 and is tuned to be compiled to Java 1.4 code
-level so most of environment can use it. Settings in `pom.xml` are however
-higher (via properties you can change on ancient systems) so it is easy to
-build by default on modern toolkits.
+- A Java JDK 6 correctly set in the environment (i.e. `bin` folder in `PATH`)
+- A Maven 3 installation set in the environment (i.e. `bin` folder in `PATH`)
+  and sufficient configuration (internet connection, local repository) to
+  let Maven get all plugins to make processes.
+
+jNut is originally written in Java SE 1.4 and is tuned to be compiled
+to Java 1.4 code level, so most environments can use it.
+
+Settings in `pom.xml` are however higher (via properties which you can change
+on ancient systems), so it is easy to build by default on modern toolkits.
 
 jNut building
 ^^^^^^^^^^^^^
 
-Once JDK and Maven installed and configured, just go into the jNut directory
+Once JDK and Maven installed and configured, go into the `jNut` directory
 and type:
 
 	mvn install
 
-The produced package called 'jNut-x.x-xxx.jar' is located in 'target'
-subdirectory.
+The produced package called 'jNut-x.x-xxx.jar' is located in the `target`
+subdirectory (and a copy is installed into your local Maven repository
+for further dependency resolution).
 
 jNut javadoc
 ^^^^^^^^^^^^
@@ -38,21 +42,21 @@ You can generate jNut javadoc by typing:
 
 	mvn javadoc:javadoc
 
-Documentation will be generated in 'target/site/apidocs' subdirectory and its
-entry point is located at 'target/site/apidocs/index.html'.
+Documentation will be generated in the `target/site/apidocs` subdirectory,
+and its entry point is located at `target/site/apidocs/index.html`.
 
 Workspace cleaning
 ^^^^^^^^^^^^^^^^^^
 
-The jNut workspace can be cleaned by removing the 'target' subdirectory or by
-typing:
+The jNut workspace can be cleaned by removing the `target` subdirectory,
+or by typing:
 
 	mvn clean
 
 Unit test notes
 ^^^^^^^^^^^^^^^
 
-jNut sources embed some unit tests in the 'src/test/java' subdirectory.
+jNut sources embed some unit tests in the `src/test/java` subdirectory.
 These tests are based on JUnit and are executed between compilation and
 packaging phases at each build.
 
@@ -60,14 +64,14 @@ Implementation notes
 ^^^^^^^^^^^^^^^^^^^^
 
 Currently, jNut is not thread safe. It is not protected against concurrent
-queries but queries to different clients can be done in parallel as there are
-done on different sockets.
+queries, but queries to different clients can be done in parallel as these
+are done on different sockets.
 
-Moreover, jNut have no connection preservation system so servers can break down
-connections due to timeout.
+Moreover, jNut has no connection preservation system, so
+servers can break down connections due to timeout or overload.
 Application using retrieved data must forget them when a disconnection occurs.
-If the application want to maintain the connection, it must implement a
-ping-pong mecanism itself.
+If the application wants to maintain the connection, it must implement a
+ping-pong mechanism itself.
 
 At present time, jNut do not support SSL connection. It is planned for near
 future.
