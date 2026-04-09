@@ -185,9 +185,9 @@ public class AppList
         Client client = new Client();
         try {
             client.setSslConfig(sslConfig);
+            client.connect(host, port, login, pass);
             if (tracking)
                 client.setTracking(true);
-            client.connect(host, port, login, pass);
 
             Device[] devs = client.getDeviceList();
             if(devs!=null)
