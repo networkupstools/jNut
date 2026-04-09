@@ -87,7 +87,13 @@ public class Device {
     /**
      * Log in to the UPS to assume a special role which matters
      * to orchestration of the server lifecycle and its other clients.
-     * NOTE: Call {@link Client#authenticate()} first.
+     * NOTE: Call {@link Client#authenticate()} first to provide the
+     * USERNAME and PASSWORD into the session.
+     * <p>
+     * This action assumes the upsmon SECONDARY role so we can be alerted
+     * and initiate a shutdown if someone else sends the FSD command to
+     * this UPS; we can further {@link #becomePrimary()} if we are the
+     * system which manages it.
      * <p>
      * Use this to log the fact that a system is drawing power from this UPS.
      * The <i>upsmon</i> primary system will wait until the count of attached
@@ -98,7 +104,6 @@ public class Device {
      * @throws IOException
      * @throws NutException
      * @see #becomePrimary
-     * @see #becomeSecondary
      * @see Client#authenticate
      */
     public void login() throws IOException, NutException {
@@ -122,7 +127,6 @@ public class Device {
      * (and backwards-compatible alias handling)
      * @throws IOException
      * @throws NutException
-     * @see #becomeSecondary
      * @see #login
      * @see Client#authenticate
      */
@@ -168,46 +172,10 @@ public class Device {
      * @deprecated Use {@link #becomePrimary} instead
      * @throws IOException
      * @throws NutException
-     * @see #becomeSecondary NOTE: There never was a "slave" command in jNut
      */
     @Deprecated
     public void master() throws IOException, NutException {
         sendMasterCommand();
-    }
-
-    /**
-     * This function does little by itself.
-     * It is used by <i>upsmon</i> to make sure that slave instances are known
-     * and waited for by the master instance to disconnect from the data server
-     * in case of FSD and mass shutdown.
-     * <p>
-     * NOTE: API changed since NUT 2.8.0 to replace SLAVE with SECONDARY
-     * (and backwards-compatible alias handling)
-     * @throws IOException
-     * @throws NutException
-     * @see #becomePrimary
-     * @see #login
-     * @see Client#authenticate
-     */
-    public void becomeSecondary() throws IOException, NutException {
-        if(client!=null)
-        {
-            try {
-                String res = client.query("SECONDARY", name);
-                if(!res.startsWith("OK"))
-                {
-                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.becomeSecondary : " + res);
-                }
-            } catch (NutException ex) {
-                // Retry with SLAVE if SECONDARY failed
-                String res = client.query("SLAVE", name);
-                if(!res.startsWith("OK"))
-                {
-                    // Normally response should be OK or ERR and nothing else.
-                    throw new NutException(NutException.UnknownResponse, "Unknown response in Device.becomeSecondary : " + res);
-                }
-            }
-        }
     }
 
     /**
