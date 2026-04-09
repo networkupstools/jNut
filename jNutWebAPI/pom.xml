@@ -2,7 +2,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <parent>
         <groupId>org.networkupstools</groupId>
         <artifactId>jNut-parent</artifactId>
@@ -12,7 +11,7 @@
     <artifactId>jNutWebAPI</artifactId>
     <packaging>war</packaging>
 
-    <name>jNutWebAPI</name>
+    <name>jNutWebAPI NUT client REST API WAR</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>

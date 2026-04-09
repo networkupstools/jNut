@@ -11,8 +11,8 @@
   <artifactId>jNut</artifactId>
   <packaging>jar</packaging>
 
-  <name>jNut</name>
-  <url>http://maven.apache.org</url>
+  <name>jNut client library</name>
+  <url>https://maven.apache.org</url>
 
   <dependencies>
     <dependency>

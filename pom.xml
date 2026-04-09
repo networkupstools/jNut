@@ -8,7 +8,8 @@
   <artifactId>jNut-parent</artifactId>
   <version>0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>JNut global project</name>
+
+  <name>jNut client project parent POM</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
