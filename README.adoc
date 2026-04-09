@@ -15,6 +15,10 @@ originally written by Emilien Kia in 2011, sponsored by Eaton, and
 released under GPL v2 as part of NUT code base (repository separated
 as a standalone project in 2013).
 
+For consistency with other ecosystem projects, the current license is
+link:https://www.gnu.org/software/classpath/license.html[GPL-2.0-with-classpath-exception],
+see the link:LICENSE.md[LICENSE.md] file for details.
+
 Submodules are:
 
 * "jNut": this directory contains maven project and source files for jNut,
