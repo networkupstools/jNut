@@ -12,7 +12,6 @@
   <packaging>jar</packaging>
 
   <name>jNutList example client</name>
-  <url>https://maven.apache.org</url>
 
   <dependencies>
     <dependency>

@@ -12,7 +12,6 @@
   <packaging>jar</packaging>
 
   <name>jNut client library</name>
-  <url>https://maven.apache.org</url>
 
   <dependencies>
     <dependency>
