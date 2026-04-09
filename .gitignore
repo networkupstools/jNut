@@ -1,4 +1,6 @@
 *.class
+*.bak*
+*.orig*
 
 # Package Files #
 *.jar
@@ -7,6 +9,10 @@
 
 # Maven build workspace #
 target/
+*.releaseBackup
+release.properties
 
 # NIT generated configs, if running from workspace root
 tmp/
+
+/.idea/
