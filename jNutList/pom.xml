@@ -30,7 +30,6 @@
              org.apache.maven.plugins ...which is assumed by default.
          -->
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.8.0</version>
         <configuration>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
