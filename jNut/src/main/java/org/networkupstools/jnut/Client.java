@@ -20,6 +20,7 @@
 package org.networkupstools.jnut;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
@@ -175,7 +176,8 @@ public class Client {
     }
 
     /**
-     * Set the tracking activation status.
+     * Set the tracking activation status; requires that
+     * the client connection is already active.
      * @param tracking New tracking activation status.
      * @throws IOException
      * @throws NutException
@@ -524,8 +526,10 @@ public class Client {
      */
     protected String query(String query) throws IOException, NutException
     {
-        if(!isConnected())
-            return null;
+        if(!isConnected()) {
+            throw new NutException(NutException.ServerNotConnected, "Not connected");
+            //return null;
+        }
 
         socket.write(query);
         String res = socket.read();
@@ -562,8 +566,10 @@ public class Client {
      */
     protected String get(String subcmd, String [] params) throws IOException, NutException
     {
-        if(!isConnected())
-            return null;
+        if(!isConnected()) {
+            throw new NutException(NutException.ServerNotConnected, "Not connected");
+            //return null;
+        }
 
         subcmd = merge(subcmd, params);
         socket.write("GET " + subcmd);
@@ -614,8 +620,10 @@ public class Client {
      */
     protected String[] list(String subcmd, String [] params) throws IOException, NutException
     {
-        if(!isConnected())
-            return null;
+        if(!isConnected()) {
+            throw new NutException(NutException.ServerNotConnected, "Not connected");
+            //return null;
+        }
 
         subcmd = merge(subcmd, params);
         socket.write("LIST " + subcmd);
