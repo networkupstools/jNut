@@ -75,3 +75,24 @@ To use the same server port across several re-runs of this script and
 ultimately of the `nit.sh` which actually sets up the environment, you
 can e.g. `export NUT_PORT=34930` (be careful to not use port `12345` which
 the Java debug bridge seems to use by default, at least in IntelliJ IDEA).
+
+Releasing
+~~~~~~~~~
+
+Follow the standard Maven release process:
+
+	mvn release:prepare
+
+This should move the versions and `git tag` the result, build the artifacts
+and run tests, and `git push` the repository.
+
+NOTE: There is currently no `mvn release:perform` to push the artifacts to
+some Internet repository.
+
+To prepare tarballs (source, docs, binaries) for the NUT website or GitHub
+Releases attachment, `git checkout` the commit with exact (not `*-SNAPSHOT`)
+version and use the `make-tarballs.sh` script.
+
+Finally, at https://github.com/networkupstools/jNut/releases/new draft a
+new release (choose tag, generate notes, attach tarballs and JAR/WAR files
+directly) and announce in nut-website::news.txt.
