@@ -4,10 +4,6 @@ jNut
 A NUT Client for Java: library, sample command-line client, WAR suitable
 for deployment into web application servers to handle NUT via REST API.
 
-The `test-NIT.sh` script can be used to arrange a NUT driver+server setup
-using the NUT Integration Test suite script (you can
-find it in the main NUT repository).
-
 For more details about the NUT ecosystem, please see
 https://networkupstools.org/ and
 https://github.com/networkupstools/nut/
@@ -42,3 +38,40 @@ Submodules are:
 * "jNutWebAPI": this directory contains maven project and source files for
   jNutWebAPI, a simple Java web archive which allows to provide
   access to NUT information via REST web services.
+
+Testing against real NUT server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `test-NIT.sh` script can be used to arrange a NUT driver+server setup
+using the NUT Integration Test suite script `nit.sh`. You can find it in
+the main NUT repository as part of a Git checkout, or specifically fetch
+https://raw.githubusercontent.com/networkupstools/nut/refs/heads/master/tests/NIT/nit.sh
+and place where your `PATH` resolves it (or use `NUT_BUILDDIR` for a
+custom build, as detailed below).
+
+* See `.github/workflows/04-maven-nit.yml` for an example of how CI does this.
+
+By default the `test-NIT.sh` script can handle a packaged NUT installation
+on Debian or Ubuntu (as used by CI runners), and probably elsewhere that
+all needed programs are in `PATH` (you may customize yours for a similar
+effect on further systems).
+
+To run against binaries from your custom build of NUT, you can specify the
+`NUT_BUILDDIR` location and the script should figure out the rest:
+
+	:; NUT_BUILDDIR="/tmp/nut/build-clion" ./test-NIT.sh
+
+To iterate as a developer, you can spawn a sub-shell after the NUT drivers
+and data server are started, so they are indefinitely running (and the data
+server is logging at `NUT_DEBUG_LEVEL_UPSD` verbosity, by default '6')
+until you exit that shell:
+
+	:; NUT_BUILDDIR="/tmp/nut/build-clion" JNUT_TEST_NIT_SUBSHELL=true ./test-NIT.sh
+
+This allows you to run the client from an IDE with a debugger against a
+persistently available test server listening at `localhost:${NUT_PORT}`.
+
+To use the same server port across several re-runs of this script and
+ultimately of the `nit.sh` which actually sets up the environment, you
+can e.g. `export NUT_PORT=34930` (be careful to not use port `12345` which
+the Java debug bridge seems to use by default, at least in IntelliJ IDEA).
