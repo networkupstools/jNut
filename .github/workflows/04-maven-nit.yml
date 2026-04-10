@@ -72,11 +72,36 @@ jobs:
     # Setup NUT, run client (add in-tree script for that and call it)
     # NOTE: We use binaries from the package for speedier turnaround
     # TOTHINK: No SSL self-reporting before NUT v2.8.5 ...
-    - name: Checkout NUT sources (for NIT script)
+    #- name: Checkout NUT sources (for NIT script)
+    #  run: |
+    #    git clone --depth=1 https://github.com/networkupstools/nut
+
+    - name: Fetch NIT script from NUT sources
       run: |
-        git clone --depth=1 https://github.com/networkupstools/nut
+        curl -L https://raw.githubusercontent.com/networkupstools/nut/refs/heads/master/tests/NIT/nit.sh > ~/nit.sh \
+        || cp -pf ~/nit.sh.bak ~/nit.sh \
+        || { git clone --depth=1 https://github.com/networkupstools/nut && cp -pf nut/tests/NIT/nit.sh ~/nit.sh ; } \
+        || exit
+        [ -s ~/nit.sh ] || exit
+        chmod +x ~/nit.sh
+        cp -pf ~/nit.sh ~/nit.sh.bak
+
+    - name: Prepare nit.sh.bak cache
+      # Based on https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#example-using-the-cache-action example
+      id: cache-nitcache
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-nitcache-
+      with:
+        path: |
+            ~/nit.sh.bak
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/.timestamp-init') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
 
     - if: matrix.os == 'ubuntu-latest'
       name: Test jNut with NIT
       run: |
-        PATH="`pwd`/nut/tests/NIT:${PATH}" ./test-NIT.sh
+        PATH="${HOME}:${PATH}" ./test-NIT.sh
