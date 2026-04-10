@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.networkupstools</groupId>
     <artifactId>jNut-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
   </parent>
 
   <artifactId>jNutList</artifactId>
