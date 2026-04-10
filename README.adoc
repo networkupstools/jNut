@@ -84,16 +84,20 @@ Follow the standard Maven release process:
 	mvn clean
 	mvn release:prepare
 
-This should move the versions and `git tag` the result, build the artifacts
-and run tests, and `git push` the repository (be sure to have the SSH agent
-with imported keys active in your environment).
+This should move the version from snapshot to exact, `git tag` the result,
+move the version to the next release line snapshot and `git commit` that
+result (note: these commits are not signed by default, unless your custom
+git config says to do so), build the artifacts and run tests, and `git push`
+the repository (be sure to have the SSH agent with imported keys active in
+your environment).
 
 NOTE: There is currently no `mvn release:perform` to push the artifacts to
 some Internet repository.
 
 To prepare tarballs (source, docs, binaries) for the NUT website or GitHub
-Releases attachment, `git checkout` the commit with exact (not `*-SNAPSHOT`)
-version and use the `make-tarballs.sh` script.
+Releases attachment, `git checkout` the newly created tag commit with exact
+(not `*-SNAPSHOT`) version and use the `make-tarballs.sh -f` script to build
+all that is needed.
 
 Finally, at https://github.com/networkupstools/jNut/releases/new draft a
 new release (choose tag, generate notes, attach tarballs and JAR/WAR files
