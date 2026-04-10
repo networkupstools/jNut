@@ -81,10 +81,12 @@ Releasing
 
 Follow the standard Maven release process:
 
+	mvn clean
 	mvn release:prepare
 
 This should move the versions and `git tag` the result, build the artifacts
-and run tests, and `git push` the repository.
+and run tests, and `git push` the repository (be sure to have the SSH agent
+with imported keys active in your environment).
 
 NOTE: There is currently no `mvn release:perform` to push the artifacts to
 some Internet repository.
