@@ -177,7 +177,14 @@ if [ -d "$NUT_CONFPATH/cert/upsd" ] ; then
     keytool -importcert -noprompt -keystore "${JNUTKS}" -storepass "changeit" -alias "${TESTCERT_SERVER_NAME}" -file "${TESTCERT_PATH_SERVER}/server.crt"
 
     if [ ! -e "${TESTCERT_PATH_CLIENT}/client.p12" ] ; then
-        pk12util -o "${TESTCERT_PATH_CLIENT}/client.p12" -n "${TESTCERT_CLIENT_NAME}" -d "${TESTCERT_PATH_CLIENT}" -W "${TESTCERT_CLIENT_PASS}" -K "${TESTCERT_CLIENT_PASS}"
+        if [ -s "${TESTCERT_PATH_CLIENT}/client.key" ] && [ -s "${TESTCERT_PATH_CLIENT}/client.crt" ] && command -v openssl ; then
+            # Key goes first!
+            [ -s "${TESTCERT_PATH_CLIENT}/.pwfile" ] || { echo "${TESTCERT_CLIENT_PASS}" > ${TESTCERT_PATH_CLIENT}/.pwfile; }
+            cat "${TESTCERT_PATH_CLIENT}/client.key" "${TESTCERT_PATH_CLIENT}/client.crt" "${TESTCERT_PATH_ROOTCA}/rootca.pem" \
+            | openssl pkcs12 -export -password "file:${TESTCERT_PATH_CLIENT}/.pwfile" -name "${TESTCERT_CLIENT_NAME}" -caname "${TESTCERT_ROOTCA_NAME}" -out ${TESTCERT_PATH_CLIENT}/client.p12
+        else
+            pk12util -o "${TESTCERT_PATH_CLIENT}/client.p12" -n "${TESTCERT_CLIENT_NAME}" -d "${TESTCERT_PATH_CLIENT}" -W "${TESTCERT_CLIENT_PASS}" -K "${TESTCERT_CLIENT_PASS}"
+        fi
     fi
     # keytool -importcert -noprompt -keystore "${JNUTKS}" -storepass "changeit" -alias "${TESTCERT_CLIENT_NAME}" -file "${TESTCERT_PATH_CLIENT}/client.crt"
     keytool -importkeystore -srckeystore "${TESTCERT_PATH_CLIENT}/client.p12" -srcstoretype PKCS12 -srcstorepass "${TESTCERT_CLIENT_PASS}" -srckeypass "${TESTCERT_CLIENT_PASS}" -destkeystore "${JNUTKS}" -deststoretype JKS -deststorepass "changeit" -destkeypass "changeit" -srcalias "${TESTCERT_CLIENT_NAME}" -destalias "${TESTCERT_CLIENT_NAME}" -v
