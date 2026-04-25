@@ -30,6 +30,10 @@
 # not so much general NUT_DEBUG_LEVEL that would add noise from drivers:
 [ -n "${NUT_DEBUG_LEVEL_UPSD}" ] || NUT_DEBUG_LEVEL_UPSD=6
 
+# Re-use test certificates if we can, focus on jNut testing:
+[ -n "${DO_USE_NUTCI_CACHE-}" ] || DO_USE_NUTCI_CACHE=yes
+export DO_USE_NUTCI_CACHE
+
 # Normalize incoming paths, e.g. avoid `~` chars for home-dir builds if we can:
 if [ -n "${NUT_BUILDDIR-}" ] ; then
     D="`cd \"${NUT_BUILDDIR}\" && pwd`" && NUT_BUILDDIR="$D"

@@ -95,6 +95,7 @@ jobs:
       with:
         path: |
             ~/nit.sh.bak
+            ~/.cache/nut-ci
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/.timestamp-init') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -104,4 +105,4 @@ jobs:
     - if: matrix.os == 'ubuntu-latest'
       name: Test jNut with NIT
       run: |
-        PATH="${HOME}:${PATH}" ./test-NIT.sh
+        DO_USE_NUTCI_CACHE=yes PATH="${HOME}:${PATH}" ./test-NIT.sh
