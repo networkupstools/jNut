@@ -69,7 +69,9 @@ fi
     exit 1
 }
 NIT_SCRIPT_DIR="`dirname \"${NIT_SCRIPT}\"`"
-D="`cd \"${NIT_SCRIPTDIR}\" && pwd`" && NIT_SCRIPT_DIR="$D"
+if [ -n "${NIT_SCRIPTDIR}" ]; then
+    D="`cd \"${NIT_SCRIPTDIR}\" && pwd`" && NIT_SCRIPT_DIR="$D"
+fi
 
 [ -n "${TEST_JAR-}" ] || {
     TEST_JAR="`ls -1 ./jNutList/target/jNutList-*-jar-with-dependencies.jar | tail -1`" || {
