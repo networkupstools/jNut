@@ -51,7 +51,7 @@ jobs:
     - name: Prepare maven cache
       # Based on https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#example-using-the-cache-action example
       id: cache-m2cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       env:
         cache-name: cache-m2cache-
       with:
@@ -89,7 +89,7 @@ jobs:
     - name: Prepare nit.sh.bak cache
       # Based on https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#example-using-the-cache-action example
       id: cache-nitcache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       env:
         cache-name: cache-nitcache-
       with:
