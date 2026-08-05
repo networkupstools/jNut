@@ -278,7 +278,7 @@ public class Scanner {
      * @return Value of the parameter, null if not found.
      */
     public String getParam(String name) {
-        if (config == null) {
+        if (config != null) {
             return (String)config.get(name);
         }
         return null;
@@ -290,7 +290,7 @@ public class Scanner {
      * @return True if the scanner has the parameter set.
      */
     public boolean hasParam(String name) {
-        if (config == null) {
+        if (config != null) {
             return config.get(name)!=null;
         }
         return false;
