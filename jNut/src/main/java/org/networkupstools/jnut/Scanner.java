@@ -360,13 +360,14 @@ public class Scanner {
      */
     DiscoveredDevice[] processScanResult(Process process) throws IOException {
         List/*<DiscoveredDevice>*/ list = new ArrayList/*<DiscoveredDevice>*/();
-        InputStream is = process.getInputStream();
-        BufferedReader in = new BufferedReader(new InputStreamReader(is));
-        String line;
-        for (line = in.readLine(); line != null; line = in.readLine()) {
-            DiscoveredDevice dev = scanLine(line);
-            if (dev != null) {
-                list.add(dev);
+        try (InputStream is = process.getInputStream();
+                BufferedReader in = new BufferedReader(new InputStreamReader(is))) {
+            String line;
+            for (line = in.readLine(); line != null; line = in.readLine()) {
+                DiscoveredDevice dev = scanLine(line);
+                if (dev != null) {
+                    list.add(dev);
+                }
             }
         }
         return (DiscoveredDevice[]) list.toArray(new DiscoveredDevice[list.size()]);
