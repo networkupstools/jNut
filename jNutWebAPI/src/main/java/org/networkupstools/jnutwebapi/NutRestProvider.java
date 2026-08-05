@@ -63,8 +63,16 @@ public class NutRestProvider {
             int idx = server.indexOf(':');
             if(idx!=-1)
             {
-                int port = Integer.parseInt(server.substring(idx+1));
-                client.connect(server.substring(0, idx), port);
+                String host = server.substring(0, idx);
+                String portPart = server.substring(idx+1);
+                try {
+                    int port = Integer.parseInt(portPart);
+                    client.connect(host, port);
+                } catch (NumberFormatException ex) {
+                    String sanitizedServer = server.replace('\n', '_').replace('\r', '_');
+                    Logger.getLogger(NutRestProvider.class.getName()).log(Level.WARNING, "Invalid port in server parameter: " + sanitizedServer + ". Falling back to default port 3493.", ex);
+                    client.connect(host, 3493);
+                }
             }
             else
             {
