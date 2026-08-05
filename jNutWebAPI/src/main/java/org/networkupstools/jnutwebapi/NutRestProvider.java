@@ -20,6 +20,9 @@ package org.networkupstools.jnutwebapi;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,6 +43,15 @@ import org.networkupstools.jnut.Variable;
  */
 @Path("/servers")
 public class NutRestProvider {
+
+    private static final Set<String> ALLOWED_UPSD_HOSTS = new HashSet<String>(Arrays.asList(
+            "127.0.0.1",
+            "localhost"
+    ));
+
+    private static boolean isAllowedServerHost(String host) {
+        return host != null && ALLOWED_UPSD_HOSTS.contains(host);
+    }
 
     @GET
     public String get() {
@@ -64,6 +76,9 @@ public class NutRestProvider {
             if(idx!=-1)
             {
                 String host = server.substring(0, idx);
+                if (!isAllowedServerHost(host)) {
+                    throw new IllegalArgumentException("Server host is not allowed");
+                }
                 String portPart = server.substring(idx+1);
                 try {
                     int port = Integer.parseInt(portPart);
@@ -76,6 +91,9 @@ public class NutRestProvider {
             }
             else
             {
+                if (!isAllowedServerHost(server)) {
+                    throw new IllegalArgumentException("Server host is not allowed");
+                }
                 client.connect(server, 3493);
             }
         }
