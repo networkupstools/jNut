@@ -112,6 +112,7 @@ public class NutException extends java.lang.Exception{
      * Format an exception message.
      * @return Exception message
      */
+    @Override
     public String toString() {
         return "[" + getClass().getSimpleName() + "]" + getMessage() + " : " + getExtra();
     }
