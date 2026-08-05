@@ -54,7 +54,9 @@ public class NutRestProvider {
     }
 
     public static Set<String> getAllowedServerHosts() {
-        return ((HashSet)(ALLOWED_UPSD_HOSTS)).clone();
+        Set<String> retval = new HashSet<String>();
+        retval.addAll(ALLOWED_UPSD_HOSTS);
+        return retval;
     }
 
     public static void addAllowedServerHost(String host) {
