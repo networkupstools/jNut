@@ -49,8 +49,22 @@ public class NutRestProvider {
             "localhost"
     ));
 
-    private static boolean isAllowedServerHost(String host) {
+    public static boolean isAllowedServerHost(String host) {
         return host != null && ALLOWED_UPSD_HOSTS.contains(host);
+    }
+
+    public static Set<String> getAllowedServerHosts() {
+        return ALLOWED_UPSD_HOSTS.clone();
+    }
+
+    public static void addAllowedServerHost(String host) {
+        if (host != null)
+            ALLOWED_UPSD_HOSTS.add(host);
+    }
+
+    public static void removeAllowedServerHost(String host) {
+        if (host != null)
+            ALLOWED_UPSD_HOSTS.remove(host);
     }
 
     @GET
