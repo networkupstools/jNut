@@ -328,8 +328,16 @@ public class Scanner {
             File dir = null;
 
             if (localExecPath != null && !localExecPath.isEmpty()) {
-                dir = new File(localExecPath);
-                if (!dir.exists() || !dir.isDirectory()) {
+                try {
+                    if (localExecPath.contains("..")) {
+                        dir = null;
+                    } else {
+                        File candidate = new File(localExecPath).getCanonicalFile();
+                        if (candidate.exists() && candidate.isDirectory()) {
+                            dir = candidate;
+                        }
+                    }
+                } catch (IOException e) {
                     dir = null;
                 }
             }
