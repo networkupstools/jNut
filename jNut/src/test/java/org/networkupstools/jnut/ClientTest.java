@@ -110,4 +110,34 @@ public class ClientTest extends TestCase
         assertEquals("Simple name / doublequote value (name)", "name", res[0]);
         assertEquals("Simple name / doublequote value (value)", "complex\"value", res[1]);
     }
+
+    /**
+     * LIST CLIENT results already contain only client identifiers.
+     */
+    public void testGetClients() throws Exception
+    {
+        String[][] responses = {
+            new String[0],
+            {"127.0.0.1"},
+            {"::1", "192.0.2.1", "192.0.2.1"},
+            null
+        };
+        for (final String[] response : responses) {
+            Client client = new Client() {
+                protected String[] list(String subcmd, String param) {
+                    assertEquals("CLIENT", subcmd);
+                    assertEquals("ups1", param);
+                    return response;
+                }
+            };
+            String[] actual = new Device("ups1", client).getClients();
+            String[] expected = response == null ? new String[0] : response;
+            assertEquals(expected.length, actual.length);
+            for (int i = 0; i < expected.length; i++) {
+                assertEquals(expected[i], actual[i]);
+            }
+        }
+        assertNull(new Device("ups1", null).getClients());
+    }
+
 }
