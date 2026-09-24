@@ -18,6 +18,13 @@
 */
 package org.networkupstools.jnut;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -43,6 +50,86 @@ public class ClientTest extends TestCase
     public static Test suite()
     {
         return new TestSuite( ClientTest.class );
+    }
+
+    public void testTrackingOnEachConnection() throws Exception
+    {
+        Client client = new Client();
+        try (ServerSocket server = new ServerSocket(0, 1,
+                InetAddress.getByName("127.0.0.1"))) {
+            server.setSoTimeout(3000);
+            client.connect("127.0.0.1", server.getLocalPort());
+            for (int session = 0; session < 4; session++) {
+                try (Socket peer = server.accept()) {
+                    peer.setSoTimeout(3000);
+                    BufferedReader input = new BufferedReader(
+                        new InputStreamReader(peer.getInputStream(), "UTF-8"));
+                    OutputStreamWriter output = new OutputStreamWriter(
+                        peer.getOutputStream(), "UTF-8");
+                    assertFalse("New connection must enable tracking again",
+                        client.isTrackingEnabled());
+
+                    // Queue replies so no background server thread is needed.
+                    output.write("OK\nOK TRACKING id\nSUCCESS\n"
+                        + "OK TRACKING id\nSUCCESS\nOK\n"
+                        + "ERR ACCESS-DENIED\nOK\n");
+                    output.flush();
+                    peer.shutdownOutput();
+                    Device device = new Device("ups", client);
+                    Variable variable = new Variable("driver.debug", device);
+                    assertNull(variable.setValue("1", 1, 1));
+                    assertTrue(client.isTrackingEnabled());
+                    assertEquals("SET TRACKING ON", input.readLine());
+                    assertEquals("SET VAR ups driver.debug  \"1\"",
+                        input.readLine());
+                    assertEquals("GET TRACKING id", input.readLine());
+
+                    // An active session must not enable tracking a second time.
+                    Command command = new Command("test.command", device);
+                    assertNull(command.execute(null, 1, 1));
+                    assertEquals("INSTCMD ups test.command", input.readLine());
+                    assertEquals("GET TRACKING id", input.readLine());
+                    client.setTracking(false);
+                    assertFalse(client.isTrackingEnabled());
+                    assertEquals("SET TRACKING OFF", input.readLine());
+                    try {
+                        client.setTracking(true);
+                        fail("Expected rejected tracking request");
+                    } catch (NutException expected) {
+                        assertTrue(expected.is("ACCESS-DENIED"));
+                    }
+                    assertFalse(client.isTrackingEnabled());
+                    assertEquals("SET TRACKING ON", input.readLine());
+                    assertTrue(client.enableTrackingModeOnce());
+                    assertEquals("SET TRACKING ON", input.readLine());
+
+                    if (session == 0) {
+                        client.disconnect();
+                        client.connect("127.0.0.1", server.getLocalPort());
+                    } else if (session == 1) {
+                        client.logout();
+                        assertEquals("LOGOUT", input.readLine());
+                        client.connect("127.0.0.1", server.getLocalPort(),
+                            null, null);
+                    } else if (session == 2) {
+                        client.connect();
+                    } else {
+                        server.close();
+                        try {
+                            client.connect();
+                            fail("Expected refused replacement connection");
+                        } catch (ConnectException expected) {
+                            assertFalse(client.isConnected());
+                            assertFalse(client.isTrackingEnabled());
+                        }
+                    }
+                    assertNull("Previous connection must close",
+                        input.readLine());
+                }
+            }
+        } finally {
+            client.disconnect();
+        }
     }
 
     /**
