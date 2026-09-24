@@ -19,6 +19,7 @@
 */
 package org.networkupstools.jnut;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
@@ -341,7 +342,7 @@ public class Client {
      * Intend to authenticate with a specified login and password, overriding
      * already defined ones (remembers them as class instance fields).
      * <p>
-     * NOTE: This is an operation different from {@link Device#login} which lets
+     * NOTE: This is an operation different from {@link Device#attach} which lets
      * a program like {@code upsmon} assume a special role on a specific device.
      * @param login
      * @param passwd
@@ -358,7 +359,7 @@ public class Client {
     /**
      * Intend to authenticate with an already set login and password.
      * <p>
-     * NOTE: This is an operation different from {@link Device#login} which lets
+     * NOTE: This is an operation different from {@link Device#attach} which lets
      * a program like {@code upsmon} assume a special role on a specific device.
      * @throws IOException
      * @throws NutException
@@ -420,7 +421,38 @@ public class Client {
     }
 
     /**
-     * Log out.
+     * Detach from the UPS and disconnect this session.
+     * Prefer DETACH, retrying with LOGOUT only if the server reports
+     * UNKNOWN-COMMAND. The connection is closed even if the command fails.
+     * @throws IOException if communication fails
+     * @throws NutException if the server rejects the command
+     * @see #logout()
+     */
+    public void detach() throws IOException, NutException
+    {
+        try {
+            if (isConnected()) {
+                String res;
+                try {
+                    res = query("DETACH");
+                } catch (NutException ex) {
+                    if (!ex.is("UNKNOWN-COMMAND")) {
+                        throw ex;
+                    }
+                    res = query("LOGOUT");
+                }
+                if (!"OK Goodbye".equals(res)) {
+                    throw new NutException(NutException.UnknownResponse, "Unknown response in Client.detach : " + res);
+                }
+            }
+        } finally {
+            disconnect();
+        }
+    }
+
+    /**
+     * Send the legacy LOGOUT command and disconnect without waiting for a reply.
+     * @see #detach()
      */
     public void logout()
     {
@@ -616,6 +648,9 @@ public class Client {
 
         socket.write(query);
         String res = socket.read();
+        if (res == null) {
+            throw new EOFException("Connection closed before the server replied");
+        }
         detectError(res);
 
         if (res.startsWith("OK TRACKING ")) {

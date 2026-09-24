@@ -24,7 +24,7 @@ import java.util.ArrayList;
 /**
  * Class representing a device attached to a {@link Client} session.
  * <p>
- * It can retrieve its description, its number of logins,
+ * It can retrieve its description, its number of attached clients,
  * its variable and command lists.
  * <p>
  * A Device object can be retrieved from a {@link Client} instance,
@@ -85,7 +85,37 @@ public class Device {
     }
 
     /**
-     * Log in to the UPS to assume a special role which matters
+     * Attach to this UPS to participate in shutdown coordination.
+     * Authenticate first, as for {@link #login()}.
+     * <p>
+     * Prefer ATTACH, retrying with LOGIN only if the server reports
+     * UNKNOWN-COMMAND. Other errors, including ALREADY-ATTACHED or
+     * ALREADY-LOGGED-IN, are returned unchanged.
+     * @throws IOException if communication fails
+     * @throws NutException if the server rejects the command
+     * @see #login()
+     * @see Client#detach()
+     */
+    public void attach() throws IOException, NutException {
+        if(client!=null)
+        {
+            String res;
+            try {
+                res = client.query("ATTACH", name);
+            } catch (NutException ex) {
+                if (!ex.is("UNKNOWN-COMMAND")) {
+                    throw ex;
+                }
+                res = client.query("LOGIN", name);
+            }
+            if (!"OK".equals(res)) {
+                throw new NutException(NutException.UnknownResponse, "Unknown response in Device.attach : " + res);
+            }
+        }
+    }
+
+    /**
+     * Send the legacy LOGIN command to assume a special role which matters
      * to orchestration of the server lifecycle and its other clients.
      * NOTE: Call {@link Client#authenticate()} first to provide the
      * USERNAME and PASSWORD into the session.
@@ -103,6 +133,7 @@ public class Device {
      * or an upsmon replacement.
      * @throws IOException
      * @throws NutException
+     * @see #attach()
      * @see #becomePrimary
      * @see Client#authenticate
      */
@@ -210,16 +241,43 @@ public class Device {
     }
 
     /**
+     * Return the number of clients attached to this UPS.
+     * Prefer NUMATTACH, retrying with NUMLOGINS only if the server reports
+     * INVALID-ARGUMENT, as older servers do for an unknown GET subcommand.
+     * @return Number of clients, -1 if the response is not a number.
+     * @throws IOException if communication fails
+     * @throws NutException if the server rejects the query
+     * @see #getNumLogin()
+     */
+    public int getNumAttach() throws IOException, NutException {
+        try {
+            return getNumClients("NUMATTACH");
+        } catch (NutException ex) {
+            if (!ex.is("INVALID-ARGUMENT")) {
+                throw ex;
+            }
+            return getNumLogin();
+        }
+    }
+
+    /**
      * Return the number of clients which have done LOGIN for this UPS.
      * Force to retrieve it from UPSD and store it in a cache.
      * @return Number of clients, -1 if error.
      * @throws IOException
+     * @see #getNumAttach()
      */
     public int getNumLogin() throws IOException, NutException {
+        return getNumClients("NUMLOGINS");
+    }
+
+    private int getNumClients(String command) throws IOException, NutException {
         if(client!=null)
         {
-            String res = client.get("NUMLOGINS", name);
-            // NUMLOGINS <ups> <value>
+            String res = client.get(command, name);
+            if (res == null) {
+                throw new NutException(NutException.UnknownResponse, "Unknown response in Device." + command);
+            }
             String[] parts = res.split(" ");
             if (parts.length >= 1) {
                 try {
