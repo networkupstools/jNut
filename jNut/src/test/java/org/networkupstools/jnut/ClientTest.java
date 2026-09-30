@@ -80,7 +80,7 @@ public class ClientTest extends TestCase
                     assertNull(variable.setValue("1", 1, 1));
                     assertTrue(client.isTrackingEnabled());
                     assertEquals("SET TRACKING ON", input.readLine());
-                    assertEquals("SET VAR ups driver.debug  \"1\"",
+                    assertEquals("SET VAR ups driver.debug \"1\"",
                         input.readLine());
                     assertEquals("GET TRACKING id", input.readLine());
 
