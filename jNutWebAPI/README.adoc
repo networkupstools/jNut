@@ -110,5 +110,7 @@ or a CIDR mask:
 
 Changelog
 ^^^^^^^^^
+* "1.2": Fix IPv4 and CIDR validation for the `start`, `end` and `mask`
+  scanner parameters.
 * "0.2": Add nut-scanner.
 * "0.1": Initial version with basic dialog with UPSD.
