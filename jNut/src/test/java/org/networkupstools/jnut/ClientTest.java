@@ -124,6 +124,7 @@ public class ClientTest extends TestCase
         };
         for (final String[] response : responses) {
             Client client = new Client() {
+                @Override
                 protected String[] list(String subcmd, String param) {
                     assertEquals("CLIENT", subcmd);
                     assertEquals("ups1", param);
