@@ -278,6 +278,7 @@ public class Device {
             if (res == null) {
                 throw new NutException(NutException.UnknownResponse, "Unknown response in Device." + command);
             }
+            // e.g. NUMLOGINS <ups> <value>
             String[] parts = res.split(" ");
             if (parts.length >= 1) {
                 try {
