@@ -14,6 +14,9 @@ final class Json {
     }
 
     static String quote(String value) {
+        if (value == null) {
+            return "null";
+        }
         // Java string escapes are valid JSON; JavaScript's \' is not.
         return "\"" + StringEscapeUtils.escapeJava(value) + "\"";
     }

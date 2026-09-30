@@ -26,7 +26,8 @@ public class JsonResponseTest extends TestCase {
     public void testQuote() {
         assertEquals(JSON, Json.quote(TEXT));
         assertEquals("\"\"", Json.quote(""));
-        assertEquals("\"null\"", Json.quote(null));
+        assertEquals("null", Json.quote(null));
+        assertEquals("\"null\"", Json.quote("null"));
         assertEquals("\"\\\\n\"", Json.quote("\\n"));
     }
 
@@ -34,26 +35,32 @@ public class JsonResponseTest extends TestCase {
         boolean fail;
         boolean empty;
         boolean noDescription;
+        String value = TEXT;
         final Variable variable = new Variable(TEXT, null) {
+            @Override
             public String getValue() throws IOException {
                 check();
-                return TEXT;
+                return value;
             }
+            @Override
             public String getDescription() throws IOException {
                 check();
                 return noDescription ? null : TEXT;
             }
         };
         final Device device = new Device(TEXT, null) {
+            @Override
             public String getDescription() throws IOException {
                 check();
                 return noDescription ? null : "\""
                     + TEXT.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
             }
+            @Override
             public Variable[] getVariableList() throws IOException {
                 check();
                 return empty ? new Variable[0] : new Variable[] {variable};
             }
+            @Override
             public Variable getVariable(String name) throws IOException {
                 check();
                 return variable;
@@ -64,10 +71,12 @@ public class JsonResponseTest extends TestCase {
                 throw new IOException("Synthetic backend error");
             }
         }
+        @Override
         public Device[] getDeviceList() throws IOException {
             check();
             return empty ? new Device[0] : new Device[] {device};
         }
+        @Override
         public Device getDevice(String name) throws IOException {
             check();
             return device;
@@ -91,6 +100,12 @@ public class JsonResponseTest extends TestCase {
             assertEquals("[\n" + JSON + "\n]", device.getVars());
             assertEquals(JSON, variable.getValue());
             assertEquals(JSON, variable.getDescription());
+            fixture.value = null;
+            assertEquals("null", variable.getValue());
+            fixture.value = "null";
+            assertEquals("\"null\"", variable.getValue());
+            fixture.value = "";
+            assertEquals("\"\"", variable.getValue());
             fixture.empty = true;
             assertEquals("[\n]", server.getDeviceList());
             assertEquals("[\n]", device.getVars());
@@ -125,7 +140,7 @@ public class JsonResponseTest extends TestCase {
         Scanner.DiscoveredDevice missing =
             (Scanner.DiscoveredDevice) parse.invoke(
                 null, "USB:vendor=\"control\"");
-        assertEquals("[\n{ \"driver\":\"null\", \"port\":\"null\" }\n]",
+        assertEquals("[\n{ \"driver\":null, \"port\":null }\n]",
             ScannerProvider.toJson(new Scanner.DiscoveredDevice[] {missing}));
     }
 }
