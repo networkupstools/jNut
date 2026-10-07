@@ -129,7 +129,7 @@ public class Variable {
             }
 
             String[] params = {"VAR", device.getName(),
-                    name, " \"" + Client.escape(value) + "\""};
+                    name, "\"" + Client.escape(value) + "\""};
             String res = client.query("SET", params);
             if(!res.startsWith("OK"))
             {
