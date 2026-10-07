@@ -95,21 +95,26 @@ public class ScannerProvider {
             if(devs==null){
                 throw new WebApplicationException(503);
             }else{
-                String str = "[\n";
-                for(int i=0; i<devs.length; i++){
-                    DiscoveredDevice dev = devs[i];
-                    str += "{ driver:\"" + dev.getProperty("driver") + "\", port:\"" + dev.getProperty("port") +"\" }";
-                    if(i<devs.length-1)
-                        str += ",\n";
-                    else
-                        str += "\n";
-                }
-                str += "]";
-                return str;
+                return toJson(devs);
             }
         } catch (IOException ex) {
             Logger.getLogger(ScannerProvider.class.getName()).log(Level.SEVERE, null, ex);
             throw new WebApplicationException();
         }
+    }
+
+    static String toJson(DiscoveredDevice[] devs) {
+        String str = "[\n";
+        for (int i = 0; i < devs.length; i++) {
+            DiscoveredDevice dev = devs[i];
+            str += "{ \"driver\":" + Json.quote(dev.getProperty("driver"))
+                + ", \"port\":" + Json.quote(dev.getProperty("port")) + " }";
+            if (i < devs.length - 1) {
+                str += ",\n";
+            } else {
+                str += "\n";
+            }
+        }
+        return str + "]";
     }
 }
