@@ -110,8 +110,8 @@ public class Command {
      * @param param Command parameter (the value may be null to not send it;
      *              however, an empty string may be a valid value for server
      *              side, so a {@code ""} argument would be sent).
-     * @param waitIntervalSec Interval between checks in seconds (if >= 1).
-     * @param waitMaxCount Maximum number of checks (if >= 1).
+     * @param waitIntervalSec Interval between checks in seconds (if {@code >= 1}).
+     * @param waitMaxCount Maximum number of checks (if {@code >= 1}).
      * @return Tracking ID if tracking is enabled (and not waiting), or null.
      * @throws IOException
      * @throws NutException

@@ -81,6 +81,11 @@ ping-pong mechanism itself.
 Changelog
 ^^^^^^^^^
 
+* "1.2": Add `Device.attach()`, `Client.detach()` and `Device.getNumAttach()`
+  for the `ATTACH`, `DETACH` and `GET NUMATTACH` protocol aliases, with
+  fallback for older servers. The existing `login()`, `logout()` and
+  `getNumLogin()` methods retain their legacy commands. Server errors,
+  including `ALREADY-ATTACHED` and `ALREADY-LOGGED-IN`, are preserved.
 * "1.0": Complete support of NUT networked protocol as of release v2.8.5,
   including `STARTTLS` and `TRACKING` features.
 * "0.2": Add nut-scanner.
