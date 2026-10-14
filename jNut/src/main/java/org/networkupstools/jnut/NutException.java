@@ -42,6 +42,9 @@ package org.networkupstools.jnut;
  */
 public class NutException extends java.lang.Exception{
 
+    // Preserve the identifier used before retaining protocol reply metadata.
+    private static final long serialVersionUID = 1126652320093734468L;
+
     public static String UnknownResponse = "UNKNOWN-RESPONSE";
 
     public static String DriverNotConnected = "DRIVER-NOT-CONNECTED";
@@ -51,6 +54,9 @@ public class NutException extends java.lang.Exception{
     public static String ServerNotConnected = "SERVER-NOT-CONNECTED";
 
     public String extra = "";
+
+    // Keep wire formatting for exact fallback without changing public parsing.
+    transient String response;
 
     public NutException()
     {
@@ -106,6 +112,10 @@ public class NutException extends java.lang.Exception{
      */
     public boolean is(String name) {
         return getMessage()!=null&&getMessage().equals(name);
+    }
+
+    boolean isExact(String name) {
+        return ("ERR " + name).equals(response);
     }
 
     /**

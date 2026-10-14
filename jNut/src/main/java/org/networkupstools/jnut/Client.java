@@ -423,7 +423,9 @@ public class Client {
     /**
      * Detach from the UPS and disconnect this session.
      * Prefer DETACH, retrying with LOGOUT only if the server reports
-     * UNKNOWN-COMMAND. The connection is closed even if the command fails.
+     * exactly {@code ERR UNKNOWN-COMMAND}, without extra text.
+     * Accept both {@code OK Goodbye} and the legacy {@code Goodbye...} reply.
+     * The connection is closed even if the command fails.
      * @throws IOException if communication fails
      * @throws NutException if the server rejects the command
      * @see #logout()
@@ -436,12 +438,12 @@ public class Client {
                 try {
                     res = query("DETACH");
                 } catch (NutException ex) {
-                    if (!ex.is("UNKNOWN-COMMAND")) {
+                    if (!ex.isExact("UNKNOWN-COMMAND")) {
                         throw ex;
                     }
                     res = query("LOGOUT");
                 }
-                if (!"OK Goodbye".equals(res)) {
+                if (!"OK Goodbye".equals(res) && !"Goodbye...".equals(res)) {
                     throw new NutException(NutException.UnknownResponse, "Unknown response in Client.detach : " + res);
                 }
             }
@@ -579,17 +581,22 @@ public class Client {
         if(str.startsWith("ERR "))
         {
             String[] arr = str.split(" ", 3);
+            NutException error;
             switch(arr.length)
             {
                 case 2:
-                    throw new NutException(arr[1]);
+                    error = new NutException(arr[1]);
+                    break;
                 case 3:
-                    throw new NutException(arr[1], arr[2]);
+                    error = new NutException(arr[1], arr[2]);
+                    break;
                 default:
                     if (!isConnected())
                         throw new NutException(NutException.ServerNotConnected, "Not connected");
                     throw new NutException();
             }
+            error.response = str;
+            throw error;
         }
     }
 

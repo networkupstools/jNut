@@ -32,11 +32,15 @@ public class AttachmentTest extends TestCase {
         Session(final String[][] dialog) throws Exception {
             server.setSoTimeout(5000);
             peer = new Thread(new Runnable() {
+                @Override
                 public void run() {
-                    try (Socket socket = server.accept()) {
+                    try (Socket socket = server.accept();
+                            BufferedReader input = new BufferedReader(
+                                new InputStreamReader(
+                                    socket.getInputStream(), "UTF-8"));
+                            OutputStreamWriter output = new OutputStreamWriter(
+                                socket.getOutputStream(), "UTF-8")) {
                         socket.setSoTimeout(5000);
-                        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-                        OutputStreamWriter output = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
                         for (String[] exchange : dialog) {
                             assertEquals(exchange[0], input.readLine());
                             if (exchange[1] == null) {
@@ -65,6 +69,7 @@ public class AttachmentTest extends TestCase {
             ((StringLineSocket) field.get(client)).socket.setSoTimeout(millis);
         }
 
+        @Override
         public void close() throws Exception {
             client.disconnect();
             server.close();
@@ -137,6 +142,21 @@ public class AttachmentTest extends TestCase {
         }
     }
 
+    public void testAttachDoesNotRetryErrorExtras() throws Exception {
+        for (String extra : new String[] {"trailing", "", " ", "\t"}) {
+            try (Session s = new Session(new String[][] {
+                    {"ATTACH ups", "ERR UNKNOWN-COMMAND " + extra}})) {
+                try {
+                    s.device.attach();
+                    fail("Expected unsupported error with extra text");
+                } catch (NutException ex) {
+                    assertTrue(ex.is("UNKNOWN-COMMAND"));
+                    assertEquals(extra, ex.getExtra());
+                }
+            }
+        }
+    }
+
     public void testDetachAndLegacyFallbackCloseSession() throws Exception {
         try (Session s = new Session(new String[][] {{"DETACH", "OK Goodbye"}})) {
             s.client.detach();
@@ -151,7 +171,8 @@ public class AttachmentTest extends TestCase {
     }
 
     public void testDetachClosesWithoutRetryOnFailure() throws Exception {
-        String[] replies = {"ERR ACCESS-DENIED", "ERR INVALID-ARGUMENT", "OKAY"};
+        String[] replies = {"ERR ACCESS-DENIED", "ERR INVALID-ARGUMENT",
+            "ERR UNKNOWN-COMMAND-OTHER", "OKAY"};
         for (String reply : replies) {
             try (Session s = new Session(new String[][] {{"DETACH", reply}})) {
                 try {
@@ -181,6 +202,35 @@ public class AttachmentTest extends TestCase {
         }
     }
 
+    public void testDetachDoesNotRetryErrorExtras() throws Exception {
+        for (String extra : new String[] {"trailing", "", " ", "\t"}) {
+            try (Session s = new Session(new String[][] {
+                    {"DETACH", "ERR UNKNOWN-COMMAND " + extra}})) {
+                try {
+                    s.client.detach();
+                    fail("Expected unsupported error with extra text");
+                } catch (NutException ex) {
+                    assertTrue(ex.is("UNKNOWN-COMMAND"));
+                    assertEquals(extra, ex.getExtra());
+                    assertFalse(s.client.isConnected());
+                }
+            }
+        }
+    }
+
+    public void testDetachAcceptsLegacyGoodbye() throws Exception {
+        try (Session s = new Session(new String[][] {
+                {"DETACH", "Goodbye..."}})) {
+            s.client.detach();
+            assertFalse(s.client.isConnected());
+        }
+        try (Session s = new Session(new String[][] {
+                {"DETACH", "ERR UNKNOWN-COMMAND"}, {"LOGOUT", "Goodbye..."}})) {
+            s.client.detach();
+            assertFalse(s.client.isConnected());
+        }
+    }
+
     public void testNumberOfAttachmentsAndLegacyFallback() throws Exception {
         try (Session s = new Session(new String[][] {{"GET NUMATTACH ups", "NUMATTACH ups 2"}})) {
             assertEquals(2, s.device.getNumAttach());
@@ -195,7 +245,9 @@ public class AttachmentTest extends TestCase {
     }
 
     public void testNumberOfAttachmentsDoesNotRetryUnrelatedErrors() throws Exception {
-        String[] replies = {"ERR UNKNOWN-UPS", "ERR ACCESS-DENIED", "NUMLOGINS ups 2",
+        String[] replies = {"ERR UNKNOWN-UPS", "ERR ACCESS-DENIED",
+            "ERR INVALID-ARGUMENT-OTHER",
+            "ERR UNKNOWN-COMMAND", "NUMLOGINS ups 2",
             "NUMATTACH other-ups 2"};
         for (String reply : replies) {
             try (Session s = new Session(new String[][] {{"GET NUMATTACH ups", reply}})) {
@@ -205,6 +257,22 @@ public class AttachmentTest extends TestCase {
                 } catch (NutException ex) {
                     assertTrue(reply.startsWith("ERR ")
                         ? ex.is(reply.substring(4)) : ex.is(NutException.UnknownResponse));
+                }
+            }
+        }
+    }
+
+    public void testNumberOfAttachmentsDoesNotRetryErrorExtras()
+            throws Exception {
+        for (String extra : new String[] {"trailing", "", " ", "\t"}) {
+            try (Session s = new Session(new String[][] {
+                    {"GET NUMATTACH ups", "ERR INVALID-ARGUMENT " + extra}})) {
+                try {
+                    s.device.getNumAttach();
+                    fail("Expected unsupported error with extra text");
+                } catch (NutException ex) {
+                    assertTrue(ex.is("INVALID-ARGUMENT"));
+                    assertEquals(extra, ex.getExtra());
                 }
             }
         }

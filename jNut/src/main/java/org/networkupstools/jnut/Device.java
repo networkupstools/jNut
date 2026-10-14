@@ -89,7 +89,8 @@ public class Device {
      * Authenticate first, as for {@link #login()}.
      * <p>
      * Prefer ATTACH, retrying with LOGIN only if the server reports
-     * UNKNOWN-COMMAND. Other errors, including ALREADY-ATTACHED or
+     * exactly {@code ERR UNKNOWN-COMMAND}, without extra text.
+     * Other errors, including ALREADY-ATTACHED or
      * ALREADY-LOGGED-IN, are returned unchanged.
      * @throws IOException if communication fails
      * @throws NutException if the server rejects the command
@@ -103,7 +104,7 @@ public class Device {
             try {
                 res = client.query("ATTACH", name);
             } catch (NutException ex) {
-                if (!ex.is("UNKNOWN-COMMAND")) {
+                if (!ex.isExact("UNKNOWN-COMMAND")) {
                     throw ex;
                 }
                 res = client.query("LOGIN", name);
@@ -243,7 +244,8 @@ public class Device {
     /**
      * Return the number of clients attached to this UPS.
      * Prefer NUMATTACH, retrying with NUMLOGINS only if the server reports
-     * INVALID-ARGUMENT, as older servers do for an unknown GET subcommand.
+     * exactly {@code ERR INVALID-ARGUMENT}, without extra text, as older
+     * servers do for an unknown GET subcommand.
      * @return Number of clients, -1 if the response is not a number.
      * @throws IOException if communication fails
      * @throws NutException if the server rejects the query
@@ -253,7 +255,7 @@ public class Device {
         try {
             return getNumClients("NUMATTACH");
         } catch (NutException ex) {
-            if (!ex.is("INVALID-ARGUMENT")) {
+            if (!ex.isExact("INVALID-ARGUMENT")) {
                 throw ex;
             }
             return getNumLogin();
