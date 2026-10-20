@@ -39,6 +39,20 @@ Submodules are:
   jNutWebAPI, a simple Java web archive which allows to provide
   access to NUT information via REST web services.
 
+Building from a source release
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Both the `jNut-<version>.tar.gz` and `jNutWebAPI-<version>.tar.gz` bundles
+contain the same `jNut-<version>-src.tar.gz` archive. Extract that source
+archive into an empty directory, then run `mvn package` there. It contains
+the root `pom.xml` and all three modules, so Maven can resolve the parent
+and sibling dependencies together. Maven needs access to its configured
+repositories for third-party dependencies and plugins.
+
+The JAR files are produced in `jNut/target` and `jNutList/target`, and the
+WAR file in `jNutWebAPI/target`. Use `mvn install` at the same root if you
+also need these artifacts in your local Maven repository.
+
 Testing against real NUT server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
