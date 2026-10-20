@@ -23,6 +23,7 @@ import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PreDestroy;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -41,6 +42,14 @@ import org.networkupstools.jnut.Variable;
 @Path("/servers")
 public class NutRestProvider {
 
+    private final Client client = new Client();
+
+    @PreDestroy
+    public void disconnect() {
+        // The root resource also outlives failed subresource construction.
+        client.disconnect();
+    }
+
     @GET
     public String get() {
         return "UPSD connections";
@@ -57,7 +66,6 @@ public class NutRestProvider {
     }
 
     public class Server {
-        Client client = new Client();
 
         public Server(String server) throws IOException, UnknownHostException, NutException {
             int idx = server.indexOf(':');
