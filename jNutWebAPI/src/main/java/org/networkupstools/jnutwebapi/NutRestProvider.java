@@ -92,7 +92,7 @@ public class NutRestProvider {
                         first = false;
                     else
                         str += ",";
-                    str += "\n\"" + device.getName() + "\"";
+                    str += "\n" + Json.quote(device.getName());
                 }
                 return "[" + str + "\n]";
             } catch(Exception ex) {
@@ -134,9 +134,15 @@ public class NutRestProvider {
             public String getDescription() {
                 try {
                     String res = device.getDescription();
-                    if(!res.startsWith("\"") && !res.endsWith("\""))
-                        res = "\"" + res + "\"";
-                    return res;
+                    if (res == null) {
+                        return null;
+                    }
+                    // Device descriptions still contain NUT protocol quoting.
+                    if (res.startsWith("\"") && res.endsWith("\"")) {
+                        res = res.substring(1, res.length() - 1)
+                            .replace("\\\"", "\"").replace("\\\\", "\\");
+                    }
+                    return Json.quote(res);
                 } catch (Exception ex) {
                     Logger.getLogger(NutRestProvider.class.getName()).log(Level.SEVERE, null, ex);
                     return null;
@@ -156,7 +162,7 @@ public class NutRestProvider {
                             first = false;
                         else
                             str += ",";
-                        str += "\n\"" + variable.getName() + "\"";
+                        str += "\n" + Json.quote(variable.getName());
                     }
                     return "[" + str + "\n]";
                 } catch (Exception ex) {
@@ -187,7 +193,7 @@ public class NutRestProvider {
                 @Produces("application/json")
                 public String getValue() {
                     try {
-                        return "\"" + variable.getValue() + "\"";
+                        return Json.quote(variable.getValue());
                     } catch(Exception ex) {
                          Logger.getLogger(NutRestProvider.class.getName()).log(Level.SEVERE, null, ex);
                          return null;
@@ -200,9 +206,7 @@ public class NutRestProvider {
                 public String getDescription() {
                     try {
                         String res = variable.getDescription();
-                        if(!res.startsWith("\"") && !res.endsWith("\""))
-                            res = "\"" + res + "\"";
-                        return res;
+                        return res == null ? null : Json.quote(res);
                     } catch(Exception ex) {
                          Logger.getLogger(NutRestProvider.class.getName()).log(Level.SEVERE, null, ex);
                          return null;
