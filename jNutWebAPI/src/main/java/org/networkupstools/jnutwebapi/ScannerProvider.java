@@ -41,7 +41,7 @@ import org.networkupstools.jnut.Scanner.DiscoveredDevice;
 public class ScannerProvider {
     static final String execName = "/usr/local/ups/bin/nut-scanner";
     static final String execPath = "";
-    private static final Pattern IPV4_PATTERN = Pattern.compile("^(25[0-5]|2[0-4]\\\\d|1\\\\d\\\\d|[1-9]?\\\\d)(\\\\.(25[0-5]|2[0-4]\\\\d|1\\\\d\\\\d|[1-9]?\\\\d)){3}$");
+    private static final Pattern IPV4_PATTERN = Pattern.compile("^(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}$");
     private static final Pattern CIDR_PATTERN = Pattern.compile("^([0-9]|[1-2][0-9]|3[0-2])$");
 
     private static boolean isValidIPv4(String value) {
