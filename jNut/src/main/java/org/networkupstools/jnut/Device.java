@@ -245,15 +245,7 @@ public class Device {
         {
             String[] res = client.list("CLIENT", name);
             if(res==null) return new String[0];
-            ArrayList/*<String>*/ list = new ArrayList/*<String>*/();
-            for(int i=0; i<res.length; i++)
-            {
-                // CLIENT <ups> <host>
-                String[] parts = res[i].split(" ");
-                if(parts.length >= 2)
-                    list.add(parts[1]);
-            }
-            return (String[])list.toArray(new String[list.size()]);
+            return res;
         }
         return null;
     }
