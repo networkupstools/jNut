@@ -177,7 +177,7 @@ public class AppList
                 );
         }
 
-        System.out.println( "jNutList connecting to " + login+":"+pass+"@"+host+":"+port
+        System.out.println( "jNutList connecting to " + login+"@"+host+":"+port
             + (sslConfig == null ? "" : ", with STARTTLS mode")
             + ", with" + (tracking ? "" : "out" ) + " TRACKING for SET VAR/INSTCMD"
             );
