@@ -113,8 +113,8 @@ public class Variable {
     /**
      * Set the variable value, optionally waiting for completion.
      * @param value New value for the variable.
-     * @param waitIntervalSec Interval between checks in seconds (if >= 1).
-     * @param waitMaxCount Maximum number of checks (if >= 1).
+     * @param waitIntervalSec Interval between checks in seconds (if {@code >= 1}).
+     * @param waitMaxCount Maximum number of checks (if {@code >= 1}).
      * @return Tracking ID if tracking is enabled (and not waiting), or null.
      * @throws IOException
      * @throws NutException
