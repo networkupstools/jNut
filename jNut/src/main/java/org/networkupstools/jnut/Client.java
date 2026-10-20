@@ -274,6 +274,7 @@ public class Client {
         if(socket!=null)
             disconnect();
 
+        tracking = false;
         socket = new StringLineSocket(host, port);
 
         if (sslConfig != null) {
