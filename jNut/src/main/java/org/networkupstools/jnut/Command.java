@@ -112,9 +112,12 @@ public class Command {
      *              side, so a {@code ""} argument would be sent).
      * @param waitIntervalSec Interval between checks in seconds (if >= 1).
      * @param waitMaxCount Maximum number of checks (if >= 1).
-     * @return Tracking ID if tracking is enabled (and not waiting), or null.
-     * @throws IOException
-     * @throws NutException
+     * @return null after a successful wait or if detached from a client.
+     *         Otherwise returns the tracking ID, including after a timeout or
+     *         interruption. A plain OK reply produces an empty tracking ID.
+     * @throws IOException if communication with the server fails.
+     * @throws NutException if the request or tracked operation fails, with
+     *         the server's error code and any additional detail.
      */
     public TrackingID execute(String param, int waitIntervalSec, int waitMaxCount) throws IOException, NutException {
         if(device!=null && device.getClient()!=null)
@@ -139,7 +142,7 @@ public class Command {
             }
             TrackingID tid = client.getLastTrackingId();
             if (doWait && tid != null && tid.isValid()) {
-                if (client.waitTrackingResult(tid, waitIntervalSec, waitMaxCount)) {
+                if (client.waitForTrackedWrite(tid, waitIntervalSec, waitMaxCount)) {
                     return null;
                 }
             }
