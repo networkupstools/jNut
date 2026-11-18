@@ -84,6 +84,7 @@ Changelog
 * "1.2": `Client.waitTrackingResult()` now returns false for the tracking
   results `ERR FAILED`, `ERR INVALID-ARGUMENT`, and `ERR UNKNOWN`.
   Tracked writes continue to report the server's error code.
+  (link:https://github.com/networkupstools/jNut/pull/76[PR #76])
 * "1.0": Complete support of NUT networked protocol as of release v2.8.5,
   including `STARTTLS` and `TRACKING` features.
 * "0.2": Add nut-scanner.
