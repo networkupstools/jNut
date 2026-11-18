@@ -95,6 +95,9 @@ public class Client {
      */
     private TrackingID lastTrackingId = null;
 
+    // Scope detailed errors to the write's wire ID, including a copy made by an override.
+    private String waitingWriteId;
+
     /**
      * Get the host name or address to which the client is (or will be) connected.
      * @return Host name or address.
@@ -759,6 +762,17 @@ public class Client {
         throw new NutException(NutException.UnknownResponse, "Unknown response in getTrackingResult : " + res);
     }
 
+    boolean waitForTrackedWrite(TrackingID id, int waitIntervalSec, int waitMaxCount) throws IOException, NutException {
+        String previous = waitingWriteId;
+        waitingWriteId = id.getId();
+        try {
+            // Keep dispatching to client overrides, including nested writes.
+            return waitTrackingResult(id, waitIntervalSec, waitMaxCount);
+        } finally {
+            waitingWriteId = previous;
+        }
+    }
+
     /**
      * Wait for a tracking ID to complete.
      * @param id Tracking ID to wait for.
@@ -766,7 +780,8 @@ public class Client {
      * @param waitMaxCount Maximum number of checks.
      * @return True if the command succeeded, false if timed out or failed.
      * @throws IOException
-     * @throws NutException
+     * @throws NutException if the tracking query fails, or if a tracked write
+     *         delegated to this method and the server reports an operation failure.
      */
     public boolean waitTrackingResult(TrackingID id, int waitIntervalSec, int waitMaxCount) throws IOException, NutException {
         if (id == null || !id.isValid() || waitIntervalSec < 1 || waitMaxCount < 1) {
@@ -774,7 +789,16 @@ public class Client {
         }
 
         while (waitMaxCount > 0) {
-            String status = getTrackingResult(id);
+            String status;
+            try {
+                status = getTrackingResult(id);
+            } catch (NutException e) {
+                if ((e.is("UNKNOWN") || e.is("INVALID-ARGUMENT") || e.is("FAILED"))
+                        && !id.getId().equals(waitingWriteId)) {
+                    return false;
+                }
+                throw e;
+            }
             if ("SUCCESS".equals(status)) {
                 return true;
             } else if ("PENDING".equals(status)) {
