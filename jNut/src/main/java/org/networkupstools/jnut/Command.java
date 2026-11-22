@@ -127,7 +127,9 @@ public class Command {
 
             String[] params;
             if (param != null) {
-                params = new String[]{device.getName(), name, param};
+                // Older versions of upsd require an escaped '#' even inside quotes.
+                String value = Client.escape(param).replace("#", "\\#");
+                params = new String[]{device.getName(), name, "\"" + value + "\""};
             } else {
                 params = new String[]{device.getName(), name};
             }

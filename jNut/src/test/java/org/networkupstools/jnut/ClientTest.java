@@ -110,4 +110,25 @@ public class ClientTest extends TestCase
         assertEquals("Simple name / doublequote value (name)", "name", res[0]);
         assertEquals("Simple name / doublequote value (value)", "complex\"value", res[1]);
     }
+
+    public void testOptionalCommandArgument() throws Exception
+    {
+        class RecordingClient extends Client {
+            String request;
+            @Override
+            protected String query(String line) {
+                request = line;
+                return "OK";
+            }
+        }
+
+        RecordingClient client = new RecordingClient();
+        Command command = new Command("example", new Device("ups", client));
+        command.execute();
+        assertEquals("INSTCMD ups example", client.request);
+        command.execute("");
+        assertEquals("INSTCMD ups example \"\"", client.request);
+        command.execute("weekday hours");
+        assertEquals("INSTCMD ups example \"weekday hours\"", client.request);
+    }
 }
