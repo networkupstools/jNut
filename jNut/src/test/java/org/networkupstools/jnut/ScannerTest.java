@@ -18,6 +18,8 @@
 */
 package org.networkupstools.jnut;
 
+import java.util.Arrays;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -99,6 +101,28 @@ public class ScannerTest extends TestCase {
         assertFalse("Not have avahi scan", findStringInArray(Scanner.PARAM_SCAN_AVAHI, arr));
         assertFalse("Not have ipmi scan", findStringInArray(Scanner.PARAM_SCAN_IPMI, arr));
         assertFalse("Not have complete scan", findStringInArray(Scanner.PARAM_SCAN_COMPLETE, arr));
+    }
+
+    private static void assertOptionValue(String[] args, String option, String expected)
+    {
+        int index = Arrays.asList(args).indexOf(option);
+        assertTrue("Missing argument for " + option, index >= 0 && index + 1 < args.length);
+        assertEquals(option, expected, args[index + 1]);
+    }
+
+    public void testSNMPv3AuthenticationAndPrivacyOptions()
+    {
+        Scanner scanner = new Scanner(Scanner.SCAN_SNMP);
+        scanner.setParam(Scanner.OPTION_SNMPv3_AUTHENTICATION_PROTOCOL, "SHA");
+        scanner.setParam(Scanner.OPTION_SNMPv3_AUTHENTICATION_PASSWORD, "test auth phrase");
+        scanner.setParam(Scanner.OPTION_SNMPv3_PRIVACY_PROTOCOL, "AES");
+        scanner.setParam(Scanner.OPTION_SNMPv3_PRIVACY_PASSWORD, "test privacy phrase");
+
+        String[] args = scanner.generateCommandParameters();
+        assertOptionValue(args, "-w", "SHA");
+        assertOptionValue(args, "-W", "test auth phrase");
+        assertOptionValue(args, "-x", "AES");
+        assertOptionValue(args, "-X", "test privacy phrase");
     }
 
     /**
