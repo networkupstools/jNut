@@ -47,7 +47,7 @@ public class AppList
         Boolean setApplied = null;
 
         String cmdName  = "";
-        String cmdValue = "";
+        String cmdValue = null;
         Boolean cmdApplied = null;
 
         String optName  = "";
@@ -87,7 +87,7 @@ public class AppList
                     if (optName.equals("--instcmd")) {
                         if (count+1 < args.length) {
                             cmdName  = args[++count];
-                            cmdValue = "";
+                            cmdValue = null;
                             continue;
                         } else {
                             throw new IllegalArgumentException("Missing parameter for " + optName);

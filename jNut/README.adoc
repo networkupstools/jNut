@@ -81,6 +81,10 @@ ping-pong mechanism itself.
 Changelog
 ^^^^^^^^^
 
+* "1.2": `Command.execute(String)` sends a valid single-line NUT protocol
+  value to upsd as one argument, including an empty string. A null value
+  omits the argument.
+  (link:https://github.com/networkupstools/jNut/pull/79[PR #79])
 * "1.0": Complete support of NUT networked protocol as of release v2.8.5,
   including `STARTTLS` and `TRACKING` features.
 * "0.2": Add nut-scanner.
