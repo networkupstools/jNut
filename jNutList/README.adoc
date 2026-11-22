@@ -41,6 +41,10 @@ optionally "TRACKING" (waiting for server confirmation of completion) with `-w`,
 but note this applies to all devices found on that 'host:port' - so should be
 really limited to CI tests with simulated devices.
 
+If no device lists the requested variable or command, jNutList reports
+its name and exits with a nonzero status. When both actions are requested,
+each must match at least one device.
+
 Generally speaking:
 
 	java -jar jNutList-x.x-jar-with-dependencies.jar \

@@ -42,11 +42,11 @@ public class AppList
 
         boolean tracking   = false;
 
-        String setName  = "";
+        String setName  = null;
         String setValue = "";
         Boolean setApplied = null;
 
-        String cmdName  = "";
+        String cmdName  = null;
         String cmdValue = "";
         Boolean cmdApplied = null;
 
@@ -221,7 +221,7 @@ public class AppList
                                 System.out.println("  VAR " + var.getName() + res );
 
                                 try {
-                                    if (!setName.isEmpty() && setName.equals(var.getName())) {
+                                    if (var.getName().equals(setName)) {
                                         if (tracking)
                                             var.setValue(setValue, 1, 10);
                                         else
@@ -236,7 +236,7 @@ public class AppList
                                 }
 
                                 try {
-                                    if (!setName.isEmpty() && setName.equals(var.getName())) {
+                                    if (var.getName().equals(setName)) {
                                         var = dev.getVariable(setName);
                                         res = " = " + var.getValue() + " (" + var.getDescription() + ")";
                                         System.out.println("  UPDATED: VAR " + var.getName() + res );
@@ -271,7 +271,7 @@ public class AppList
                                 System.out.println("  CMD " + cmd.getName() + res);
 
                                 try {
-                                    if (!cmdName.isEmpty() && cmdName.equals(cmd.getName())) {
+                                    if (cmd.getName().equals(cmdName)) {
                                         if (tracking)
                                             cmd.execute(cmdValue, 1, 10);
                                         else
@@ -293,6 +293,15 @@ public class AppList
                         exitCode = 1;
                     }
                 }
+            }
+
+            if (setName != null && setApplied == null) {
+                System.err.println("No matching variable found for '" + setName + "'");
+                exitCode = 1;
+            }
+            if (cmdName != null && cmdApplied == null) {
+                System.err.println("No matching command found for '" + cmdName + "'");
+                exitCode = 1;
             }
 
             client.disconnect();
