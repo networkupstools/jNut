@@ -147,8 +147,8 @@ public class Scanner {
     static final String PARAM_SNMPv1_COMMUNITY = "-c";
     static final String PARAM_SNMPv3_SECURITY_LEVEL = "-l";
     static final String PARAM_SNMPv3_SECURITY_NAME = "-u";
-    static final String PARAM_SNMPv3_AUTHENTICATION_PROTOCOL = "-a";
-    static final String PARAM_SNMPv3_AUTHENTICATION_PASSWORD = "-A";
+    static final String PARAM_SNMPv3_AUTHENTICATION_PROTOCOL = "-w";
+    static final String PARAM_SNMPv3_AUTHENTICATION_PASSWORD = "-W";
     static final String PARAM_SNMPv3_PRIVACY_PROTOCOL = "-x";
     static final String PARAM_SNMPv3_PRIVACY_PASSWORD = "-X";
     static final String PARAM_NUT_UPSD_PORT = "-p";

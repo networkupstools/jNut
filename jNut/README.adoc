@@ -81,6 +81,9 @@ ping-pong mechanism itself.
 Changelog
 ^^^^^^^^^
 
+* "1.2": The scanner passes the configured SNMPv3 authentication protocol
+  and passphrase to `nut-scanner` with `-w` and `-W`.
+  (link:https://github.com/networkupstools/jNut/pull/77[PR #77])
 * "1.0": Complete support of NUT networked protocol as of release v2.8.5,
   including `STARTTLS` and `TRACKING` features.
 * "0.2": Add nut-scanner.
